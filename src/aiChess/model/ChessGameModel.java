@@ -9,11 +9,11 @@ import java.util.ArrayList;
 /**
  * A model that represents the state of the chess game.
  * - queries:
+ *   - which player plays next
  *   - dimension of the game board
  *   - Piece at a position 
  *   - Reachable/Attackable Positions from a given Position. 
  *   - a history of all moves made.
- *   - serialization to String for testing purposes. 
  * 
  * - modification:
  *   - requested move will be __checked__ and then applied. (invalidMoveException)
@@ -21,15 +21,27 @@ import java.util.ArrayList;
  */
 public final class ChessGameModel {
 
-  /* The board representation  */
+  /* The internal board representation  */
   private BoardModel board;
+  private PlayerType currentPlayer;
+  private List<Move> moveHistory;
+
+
+  /**
+   * Constructor; sets up all internal states.
+   * The chess board will be 8x8, and bottom player plays first.
+   */
+  public ChessGameModel() {
+    this.board = new BoardModel(8, 8);
+    this.currentPlayer = PlayerType.BOTTOM_PLAYER;
+  }
+
 
   /**
    * Return the width of the board in unit of Piece.
    */
   public int getWidth() {
-    /* TODO */
-    return 0;
+    return board.width;
   }
 
 
@@ -37,8 +49,7 @@ public final class ChessGameModel {
    * Return the height of the board board in unit of Piece.
    */
   public int getHeight() {
-    /* TODO */
-    return 0;
+    return board.height;
   }
 
 
@@ -56,10 +67,19 @@ public final class ChessGameModel {
   /**
    * Returns all the positions that the Piece at (row, col) can move to.
    * @param pos the origin position represented as (row, col)
+   * @throws invalidPositionException if (row, col) is out of bound.
+   * NOTE if (row, col) contains no piece, empty collection will be returned.
    */
   public Collection<Position> getAllMovesFrom(int row, int col) {
-    /* TODO */
-    return new ArrayList<>();
+    /* return only reachable positions */
+    Collection<Position> targets = new ArrayList<>();
+    Optional<Piece> origin = this.getPieceAt(row, col);
+    if (origin.isPresent()) {
+      for (Move m : origin.get().getAllMovesFrom(this.board, row, col)) {
+        targets.add(m.targetPos);
+      }
+    }
+    return targets;
   }
 
 
@@ -67,7 +87,33 @@ public final class ChessGameModel {
    * Return a list of all moves made, where Moves at lower index are made first.
    */
   public List<Move> getMoveHistory() {
+    /* remove dependency */
+    return new ArrayList<>(this.moveHistory);
+  }
+
+
+  /**
+   * Return the player that is supposed to make the next move.
+   */
+  public PlayerType currentPlayer() {
+    return this.currentPlayer;
+  }
+
+
+  /**
+   * Undo the last move made.
+   * @throws invalidUndoException if there isn't a last move.
+   */
+  public void undoLastMove() {
     /* TODO */
-    return new ArrayList<>();
+  }
+
+
+  /**
+   * Make the move which results from selecting (srow, scol), then (drow, dcol).
+   * @throws invalidMoveException if the move is not valid.
+   */
+  public void makeMove(int srow, int scol, int drow, int dcol) {
+    /* TODO */
   }
 }

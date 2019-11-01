@@ -11,7 +11,7 @@ final class PieceFactory {
   /**
    * Produce an instance of the piece with given configuration.
    */
-  public static Piece makePiece(int row, int col, PieceType type, PlayerType player) {
+  public static Piece makePiece(PieceType type, PlayerType player) {
     /*
     switch(type) {
       case KING: return makeKing(row, col, player);

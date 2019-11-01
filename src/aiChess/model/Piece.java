@@ -8,7 +8,7 @@ import java.util.Collection;
  * - who owns this piece
  * - what type of piece it is
  * - whether it has moved
- * - move logic (a function that determines viable moves)
+ * - move logic (board, position ==> viable moves)
  *
  * NOTE: 
  * Except for the hasMoved? property, it acts like a value class and 
