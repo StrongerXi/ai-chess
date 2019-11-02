@@ -146,7 +146,7 @@ public class PieceFactoryTest {
 
 
   /* test moves of castle in all directions, against enemy and ally */
-  //@Test
+  @Test
   public void testCastleMove() {
     /* _ _ p
      * _ _ _
@@ -185,7 +185,7 @@ public class PieceFactoryTest {
 
 
   /* test moves of knight in all directions, against enemy and ally */
-//  @Test
+  @Test
   public void testKnightMove() {
     /*
      * _ P _ b _
@@ -232,7 +232,7 @@ public class PieceFactoryTest {
 
 
   /* test moves of bishop in all directions, against enemy and ally */
-//  @Test
+  @Test
   public void testBishopMove() {
     /*
      * p _ _ _ p
@@ -274,7 +274,7 @@ public class PieceFactoryTest {
 
 
   /* test moves of queen in all directions, against enemy and ally */
-  //@Test
+  @Test
   public void testQueenMove() {
     /*
      * p _ P _ p

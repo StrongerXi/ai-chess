@@ -68,6 +68,12 @@ public abstract class Piece {
   }
 
 
+  @Override
+  public String toString() {
+    return String.format("(%s, %s)", owner.toString(), type.toString());
+  }
+
+
   /**
    * Return all moves that can be made if this Piece is currently at
    * (row, col) on the given board.

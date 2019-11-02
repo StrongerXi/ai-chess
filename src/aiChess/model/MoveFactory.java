@@ -43,17 +43,19 @@ final class MoveFactory {
     @Override
     void apply(BoardModel model) {
       Optional<Piece> sourcePiece = model.getPieceAt(sourcePos.row, sourcePos.col);
-      /* move source piece to target location */
-      model.setPieceAt(targetPos.row, targetPos.col, sourcePiece);
-      /* make source location empty */
-      model.setPieceAt(sourcePos.row, sourcePos.col, Optional.empty());
+
       /* save target piece for future undo */
-      targetPiece = model.getPieceAt(sourcePos.row, sourcePos.col);
+      targetPiece = model.getPieceAt(targetPos.row, targetPos.col);
       this.lastApplied = true;
 
       /* NOTE assume the source piece can't be empty */
       this.moveStatus = sourcePiece.get().hasMoved();
       sourcePiece.get().setMoved(true);
+
+      /* move source piece to target location */
+      model.setPieceAt(targetPos.row, targetPos.col, sourcePiece);
+      /* make source location empty */
+      model.setPieceAt(sourcePos.row, sourcePos.col, Optional.empty());
     }
 
     @Override

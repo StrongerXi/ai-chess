@@ -8,5 +8,12 @@ package aiChess.model;
  */
 public enum PlayerType {
   TOP_PLAYER, BOTTOM_PLAYER;
+
+  public String toString() {
+    switch (this) {
+      case TOP_PLAYER : return "top";
+      default : return "bottom";
+    }
+  }
 }
 
