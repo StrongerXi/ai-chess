@@ -8,7 +8,7 @@ import org.junit.Test;
 /**
  * Tests for the Piece class.
  */
-public class PieceTests {
+public class PieceTest {
 
   /* Test Piece equality */
   @Test

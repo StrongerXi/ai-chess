@@ -14,11 +14,6 @@ public abstract class Move {
   public final Position sourcePos;
   public final Position targetPos;
 
-  /* used to undo move */
-  private Optional<Piece> targetPiece = Optional.empty();
-  /* True iff the apply method was invoked last */
-  private boolean lastApplied = false;
-
   
   /**
    * Constructor.
@@ -41,4 +36,10 @@ public abstract class Move {
    * ASSUME the source and target pieces agree.
    */
   abstract void undo(BoardModel model);
+
+
+  @Override
+  public String toString() {
+    return String.format("%s to %s", sourcePos, targetPos);
+  }
 }
