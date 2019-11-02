@@ -38,6 +38,7 @@ final class PieceFactory {
       public Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
         Collection<Move> moves = new ArrayList<>();
         addCrossMoves(model, player, new Position(row, col), 1, moves);
+        addDiagonalMoves(model, player, new Position(row, col), 1, moves);
         return moves;
       }
     };
@@ -215,17 +216,17 @@ final class PieceFactory {
                                           Collection<Move> validMoves) {
 
     int oriRow = origin.row, oriCol = origin.col;
-    /* number of steps taken */
-    int steps = 0;
 
     /* use (dr, dc) as a directional vector, go towards this direction
      * until encountering boundary or another piece */
     for (int[] offset : offsets) {
       int dr = offset[0];
       int dc = offset[1];
+      /* number of steps taken in (dr, dc) direction */
+      int steps = 1;
       for (int row = oriRow + dr, col = oriCol + dc;  /* do not include origin */
            0 <= col && col < model.width && 0 <= row && row < model.height
-           && steps < maxStep;
+           && steps <= maxStep;
            row += dr, col += dc, steps += 1) {
 
         Optional<Piece> target = model.getPieceAt(row, col);

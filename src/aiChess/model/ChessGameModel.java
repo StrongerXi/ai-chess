@@ -18,6 +18,9 @@ import java.util.ArrayList;
  * - modification:
  *   - requested move will be __checked__ and then applied. (invalidMoveException)
  *   - request for undo move. (invalidUndoException)
+ *
+ * NOTE
+ * bottom left position is encoded as (0, 0).
  */
 public final class ChessGameModel {
 

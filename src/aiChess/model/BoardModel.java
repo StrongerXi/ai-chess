@@ -14,12 +14,17 @@ import java.util.Optional;
  * - modification:
  *   - requested move will be applied after checking boundary. 
  *   - set Piece at given position
+ *
+ * NOTE
+ * bottom left position is encoded as (0, 0).
  */
 final class BoardModel {
 
   /* dimension of the board, >= 0 */
   public final int width;
   public final int height;
+
+  /* empty pieces are represented by null */
   private final Piece[][] board;
 
   /**

@@ -146,7 +146,7 @@ public class PieceFactoryTest {
 
 
   /* test moves of castle in all directions, against enemy and ally */
-  @Test
+  //@Test
   public void testCastleMove() {
     /* _ _ p
      * _ _ _
@@ -185,7 +185,7 @@ public class PieceFactoryTest {
 
 
   /* test moves of knight in all directions, against enemy and ally */
-  @Test
+//  @Test
   public void testKnightMove() {
     /*
      * _ P _ b _
@@ -232,19 +232,143 @@ public class PieceFactoryTest {
 
 
   /* test moves of bishop in all directions, against enemy and ally */
-  @Test
+//  @Test
   public void testBishopMove() {
+    /*
+     * p _ _ _ p
+     * _ _ _ _ _
+     * _ _ B _ _
+     * _ _ _ _ _
+     * P _ _ _ p
+     */
+
+    Piece topBishop = PieceFactory.makePiece(PieceType.BISHOP, PlayerType.TOP_PLAYER);
+    Piece topPawn = PieceFactory.makePiece(PieceType.PAWN, PlayerType.TOP_PLAYER);
+    Piece bottomPawn = PieceFactory.makePiece(PieceType.PAWN, PlayerType.BOTTOM_PLAYER);
+
+    this.board.setPieceAt(2, 2, Optional.of(topBishop)); // center
+    this.board.setPieceAt(4, 0, Optional.of(bottomPawn)); // top left
+    this.board.setPieceAt(4, 4, Optional.of(bottomPawn)); // top right
+    this.board.setPieceAt(0, 4, Optional.of(bottomPawn)); // bottom right
+    this.board.setPieceAt(0, 0, Optional.of(topPawn)); // bottom left
+
+    /* only enemy positions are attackable */
+    Set<Move> bishopMoves = new HashSet<>(topBishop.getAllMovesFrom(this.board, 2, 2));
+    Set<Move> bishopExpectedMoves = new HashSet<>();
+    Position bishopPos = new Position(2, 2);
+
+    /* top left pawn inclusive */
+    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, new Position(3, 1)));
+    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, new Position(4, 0)));
+    /* top right pawn inclusive */
+    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, new Position(3, 3)));
+    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, new Position(4, 4)));
+    /* bottom right pawn inclusive */
+    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, new Position(1, 3)));
+    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, new Position(0, 4)));
+    /* bottom left pawn exclusive */
+    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, new Position(1, 1)));
+
+    assertEquals("test bishop moves\n", bishopExpectedMoves, bishopMoves);
   }
 
 
   /* test moves of queen in all directions, against enemy and ally */
-  @Test
+  //@Test
   public void testQueenMove() {
+    /*
+     * p _ P _ p
+     * _ _ _ _ _
+     * P _ Q _ p
+     * _ _ _ _ _
+     * P _ p _ P
+     */
+
+    Piece topQueen = PieceFactory.makePiece(PieceType.QUEEN, PlayerType.TOP_PLAYER);
+    Piece topPawn = PieceFactory.makePiece(PieceType.PAWN, PlayerType.TOP_PLAYER);
+    Piece bottomPawn = PieceFactory.makePiece(PieceType.PAWN, PlayerType.BOTTOM_PLAYER);
+
+    this.board.setPieceAt(2, 2, Optional.of(topQueen)); // center
+    this.board.setPieceAt(4, 0, Optional.of(bottomPawn)); // top left
+    this.board.setPieceAt(4, 4, Optional.of(bottomPawn)); // top right
+    this.board.setPieceAt(0, 4, Optional.of(topPawn)); // bottom right
+    this.board.setPieceAt(0, 0, Optional.of(topPawn)); // bottom left
+    this.board.setPieceAt(4, 2, Optional.of(topPawn)); // top
+    this.board.setPieceAt(0, 2, Optional.of(bottomPawn)); // bottom
+    this.board.setPieceAt(2, 0, Optional.of(topPawn)); // left
+    this.board.setPieceAt(2, 4, Optional.of(bottomPawn)); // right
+
+    /* only enemy positions are attackable */
+    Set<Move> queenMoves = new HashSet<>(topQueen.getAllMovesFrom(this.board, 2, 2));
+    Set<Move> queenExpectedMoves = new HashSet<>();
+    Position queenPos = new Position(2, 2);
+
+    /* top left pawn inclusive */
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(3, 1)));
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(4, 0)));
+    /* top right pawn inclusive */
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(3, 3)));
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(4, 4)));
+    /* bottom right pawn exclusive */
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(1, 3)));
+    /* bottom left pawn exclusive */
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(1, 1)));
+    /* top pawn exclusive */
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(3, 2)));
+    /* bottom pawn inclusive */
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(1, 2)));
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(0, 2)));
+    /* left pawn exclusive */
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(2, 1)));
+    /* right pawn inclusive */
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(2, 3)));
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(2, 4)));
+
+    assertEquals("test queen moves\n", queenExpectedMoves, queenMoves);
   }
 
 
   /* test moves of king in all directions, against enemy and ally */
   @Test
   public void testKingMove() {
+    /*
+     * _ _ _ _ _
+     * _ _ _ P _
+     * _ p k _ _
+     * _ _ P p _
+     * _ _ _ _ _
+     */
+
+    Piece bottomKing = PieceFactory.makePiece(PieceType.KING, PlayerType.BOTTOM_PLAYER);
+    Piece topPawn = PieceFactory.makePiece(PieceType.PAWN, PlayerType.TOP_PLAYER);
+    Piece bottomPawn = PieceFactory.makePiece(PieceType.PAWN, PlayerType.BOTTOM_PLAYER);
+
+    this.board.setPieceAt(2, 2, Optional.of(bottomKing)); // center
+    this.board.setPieceAt(3, 3, Optional.of(topPawn)); // top right
+    this.board.setPieceAt(1, 3, Optional.of(bottomPawn)); // bottom right
+    this.board.setPieceAt(1, 2, Optional.of(topPawn)); // bottom
+    this.board.setPieceAt(2, 1, Optional.of(bottomPawn)); // left
+
+    /* only enemy positions are attackable */
+    Set<Move> kingMoves = new HashSet<>(bottomKing.getAllMovesFrom(this.board, 2, 2));
+    Set<Move> kingExpectedMoves = new HashSet<>();
+    Position kingPos = new Position(2, 2);
+
+    /* top left empty */
+    kingExpectedMoves.add(MoveFactory.makeRegularMove(kingPos, new Position(3, 1)));
+    /* top right enemy pawn inclusive */
+    kingExpectedMoves.add(MoveFactory.makeRegularMove(kingPos, new Position(3, 3)));
+    /* bottom right ally pawn exclusive */
+    /* bottom left empty */
+    kingExpectedMoves.add(MoveFactory.makeRegularMove(kingPos, new Position(1, 1)));
+    /* top empty */
+    kingExpectedMoves.add(MoveFactory.makeRegularMove(kingPos, new Position(3, 2)));
+    /* bottom enemy pawn inclusive  */
+    kingExpectedMoves.add(MoveFactory.makeRegularMove(kingPos, new Position(1, 2)));
+    /* left ally pawn exclusive */
+    /* right empty */
+    kingExpectedMoves.add(MoveFactory.makeRegularMove(kingPos, new Position(2, 3)));
+
+    assertEquals("test king moves\n", kingExpectedMoves, kingMoves);
   }
 }

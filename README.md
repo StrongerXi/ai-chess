@@ -27,4 +27,4 @@ mvn exec:java
   
 3. Implement basic Controller and CLI View
 4. Implement GUI View
-5. Implement special moves: En Passant, Castling.
+5. Implement special moves: En Passant, Castling, Pawn Promotion
