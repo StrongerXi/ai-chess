@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 
+import aiChess.model.error.InvalidPositionException;
 
 /**
  * A model that represents the state of the chess board.
@@ -48,21 +49,25 @@ final class BoardModel {
 
   /**
    * Retrive the Piece at given row and column on this board.
-   * @throws invalidPositionException if (row, col) is out of bound.
+   * @throws InvalidPositionException if (row, col) is out of bound.
    * @return Optional.empty() if no piece is at position (row, ccol)
    */
   public Optional<Piece> getPieceAt(int row, int col) {
-    /* TODO */
+    if (row < 0 || row >= this.height || col < 0 || col >= this.width) {
+      throw new InvalidPositionException(row, col);
+    }
     return Optional.ofNullable(this.board[row][col]);
   }
 
 
   /**
    * Set the replacement Piece at given row and column on this board.
-   * @throws invalidPositionException if (row, col) is out of bound.
+   * @throws InvalidPositionException if (row, col) is out of bound.
    */
   public void setPieceAt(int row, int col, Optional<Piece> replacement) {
-    /* TODO */
+    if (row < 0 || row >= this.height || col < 0 || col >= this.width) {
+      throw new InvalidPositionException(row, col);
+    }
     this.board[row][col] = replacement.isPresent() ? replacement.get() : null;
   }
 

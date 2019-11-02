@@ -2,8 +2,13 @@ package aiChess.model;
 
 import java.util.Optional;
 import java.util.Collection;
+import java.util.Stack;
 import java.util.List;
 import java.util.ArrayList;
+
+import aiChess.model.error.InvalidMoveException;
+import aiChess.model.error.InvalidPositionException;
+import aiChess.model.error.InvalidUndoException;
 
 
 /**
@@ -27,7 +32,7 @@ public final class ChessGameModel {
   /* The internal board representation  */
   private BoardModel board;
   private PlayerType currentPlayer;
-  private List<Move> moveHistory;
+  private Stack<Move> moveHistory;
 
 
   /**
@@ -58,19 +63,21 @@ public final class ChessGameModel {
 
   /**
    * Retrive the Piece at given row and column on the board.
-   * @throws invalidPositionException if (row, col) is out of bound.
+   * @throws InvalidPositionException if (row, col) is out of bound.
    * @return Optional.empty() if no piece is at position (row, ccol)
    */
   public Optional<Piece> getPieceAt(int row, int col) {
-    /* TODO */
-    return Optional.empty();
+    if (row < 0 || row >= board.height || col < 0 || col >= board.width) {
+      throw new InvalidPositionException(row, col);
+    }
+    return this.board.getPieceAt(row, col);
   }
 
 
   /**
    * Returns all the positions that the Piece at (row, col) can move to.
    * @param pos the origin position represented as (row, col)
-   * @throws invalidPositionException if (row, col) is out of bound.
+   * @throws InvalidPositionException if (row, col) is out of bound.
    * NOTE if (row, col) contains no piece, empty collection will be returned.
    */
   public Collection<Position> getAllMovesFrom(int row, int col) {
@@ -105,18 +112,37 @@ public final class ChessGameModel {
 
   /**
    * Undo the last move made.
-   * @throws invalidUndoException if there isn't a last move.
+   * @throws InvalidUndoException if there isn't a last move.
    */
   public void undoLastMove() {
-    /* TODO */
+    if (moveHistory.isEmpty()) {
+      throw new InvalidUndoException("No undo available.\n");
+    }
+    moveHistory.pop().undo(this.board);
   }
 
 
   /**
    * Make the move which results from selecting (srow, scol), then (drow, dcol).
-   * @throws invalidMoveException if the move is not valid.
+   * @throws InvalidMoveException if the move is not valid.
    */
   public void makeMove(int srow, int scol, int drow, int dcol) {
-    /* TODO */
+    /* make sure source is in bound */
+    if (0 <= srow && srow < board.height && 0 <= scol && scol < board.width) {
+      Optional<Piece> source = this.board.getPieceAt(srow, scol);
+      Position targetPos = new Position(drow, dcol);
+      /* make sure source has a piece, and target is reachable */
+      if (source.isPresent()) {
+        for (Move m : source.get().getAllMovesFrom(this.board, srow, scol)) {
+          if (m.targetPos.equals(targetPos)) {
+            /* apply the move if it's valid */
+            m.apply(this.board);
+            moveHistory.add(m);
+          }
+        }
+      }
+    }
+
+    throw new InvalidMoveException(srow, scol, drow, dcol);
   }
 }
