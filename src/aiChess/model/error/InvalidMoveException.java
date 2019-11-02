@@ -10,4 +10,8 @@ public class InvalidMoveException extends RuntimeException {
   public InvalidMoveException(int srow, int scol, int drow, int dcol) {
     super(String.format("move: (%d, %d) to (%d, %d) is not valid\n", srow, scol, drow, dcol));
   }
+
+  public InvalidMoveException(String msg) {
+    super(msg);
+  }
 }

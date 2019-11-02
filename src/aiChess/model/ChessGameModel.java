@@ -30,9 +30,16 @@ import aiChess.model.error.InvalidUndoException;
 public final class ChessGameModel {
 
   /* The internal board representation  */
-  private BoardModel board;
+  private final BoardModel board;
+  private final Stack<Move> moveHistory = new Stack<>();
   private PlayerType currentPlayer;
-  private Stack<Move> moveHistory;
+
+  /* default configuration for a chess game */
+  private static final int WIDTH = 8;
+  private static final int HEIGHT = 8;
+  private static final PieceType outterRowTypes[] =
+  {PieceType.CASTLE, PieceType.KNIGHT, PieceType.BISHOP, PieceType.QUEEN, PieceType.KING, PieceType.BISHOP, PieceType.KNIGHT, PieceType.CASTLE};
+  
 
 
   /**
@@ -40,8 +47,20 @@ public final class ChessGameModel {
    * The chess board will be 8x8, and bottom player plays first.
    */
   public ChessGameModel() {
-    this.board = new BoardModel(8, 8);
+    this.board = new BoardModel(WIDTH, HEIGHT);
     this.currentPlayer = PlayerType.BOTTOM_PLAYER;
+    /* initialize the Pieces */
+    for (int col = 0; col < outterRowTypes.length; col += 1) {
+      Piece topPiece = PieceFactory.makePiece(outterRowTypes[col], PlayerType.TOP_PLAYER);
+      Piece bottomPiece = PieceFactory.makePiece(outterRowTypes[col], PlayerType.BOTTOM_PLAYER);
+      this.board.setPieceAt(board.height - 1, col, Optional.of(topPiece));
+      this.board.setPieceAt(0, col, Optional.of(bottomPiece));
+
+      Piece topPawn = PieceFactory.makePiece(PieceType.PAWN, PlayerType.TOP_PLAYER);
+      Piece bottomPawn = PieceFactory.makePiece(PieceType.PAWN, PlayerType.BOTTOM_PLAYER);
+      this.board.setPieceAt(board.height - 2, col, Optional.of(topPawn));
+      this.board.setPieceAt(1, col, Optional.of(bottomPawn));
+    }
   }
 
 
@@ -105,7 +124,7 @@ public final class ChessGameModel {
   /**
    * Return the player that is supposed to make the next move.
    */
-  public PlayerType currentPlayer() {
+  public PlayerType getCurrentPlayer() {
     return this.currentPlayer;
   }
 
@@ -118,7 +137,17 @@ public final class ChessGameModel {
     if (moveHistory.isEmpty()) {
       throw new InvalidUndoException("No undo available.\n");
     }
-    moveHistory.pop().undo(this.board);
+    this.moveHistory.pop().undo(this.board);
+    this.switchPlayer();
+  }
+
+
+  /**
+   * Switch the current player.
+   */
+  private void switchPlayer() {
+    this.currentPlayer = (currentPlayer == PlayerType.TOP_PLAYER) ?
+      PlayerType.BOTTOM_PLAYER : PlayerType.TOP_PLAYER;
   }
 
 
@@ -127,22 +156,35 @@ public final class ChessGameModel {
    * @throws InvalidMoveException if the move is not valid.
    */
   public void makeMove(int srow, int scol, int drow, int dcol) {
+    System.out.printf("requested move (%d, %d) to (%d, %d)\n", srow, scol, drow, dcol);
     /* make sure source is in bound */
-    if (0 <= srow && srow < board.height && 0 <= scol && scol < board.width) {
-      Optional<Piece> source = this.board.getPieceAt(srow, scol);
-      Position targetPos = new Position(drow, dcol);
-      /* make sure source has a piece, and target is reachable */
-      if (source.isPresent()) {
-        for (Move m : source.get().getAllMovesFrom(this.board, srow, scol)) {
-          if (m.targetPos.equals(targetPos)) {
-            /* apply the move if it's valid */
-            m.apply(this.board);
-            moveHistory.add(m);
-          }
-        }
+    if (srow < 0 || srow >= board.height || scol < 0 || scol >= board.width) {
+      throw new InvalidMoveException("source or target out of bound\n");
+    }
+
+    Optional<Piece> source = this.board.getPieceAt(srow, scol);
+    Position targetPos = new Position(drow, dcol);
+    /* make sure source has a piece, and target is reachable */
+    if (!source.isPresent()) {
+      throw new InvalidMoveException("origin can't be empty\n");
+    }
+
+    if (source.get().owner != currentPlayer) {
+      throw new InvalidMoveException("Not this player's turn yet\n");
+    }
+
+    /* check requested move against each possible moves */
+    for (Move m : source.get().getAllMovesFrom(this.board, srow, scol)) {
+      if (m.targetPos.equals(targetPos)) {
+        /* apply the move if it's valid */
+        m.apply(this.board);
+        moveHistory.add(m);
+        this.switchPlayer();
+        return;
       }
     }
 
+    /* the move is not valid */
     throw new InvalidMoveException(srow, scol, drow, dcol);
   }
 }
