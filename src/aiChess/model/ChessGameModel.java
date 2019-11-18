@@ -97,13 +97,18 @@ public final class ChessGameModel {
    * Returns all the positions that the Piece at (row, col) can move to.
    * @param pos the origin position represented as (row, col)
    * @throws InvalidPositionException if (row, col) is out of bound.
-   * NOTE if (row, col) contains no piece, empty collection will be returned.
+   * NOTE if (row, col) contains no piece, or it's not its owner's turn yet,
+   *      empty collection will be returned.
    */
   public Collection<Position> getAllMovesFrom(int row, int col) {
+    if (row < 0 || row >= board.height || col < 0 || col >= board.width) {
+      throw new InvalidPositionException(row, col);
+    }
     /* return only reachable positions */
     Collection<Position> targets = new ArrayList<>();
     Optional<Piece> origin = this.getPieceAt(row, col);
-    if (origin.isPresent()) {
+    // collect all reachable target position if any move is possible
+    if (origin.isPresent() && origin.get().owner == this.currentPlayer) {
       for (Move m : origin.get().getAllMovesFrom(this.board, row, col)) {
         targets.add(m.targetPos);
       }
@@ -153,7 +158,10 @@ public final class ChessGameModel {
 
   /**
    * Make the move which results from selecting (srow, scol), then (drow, dcol).
-   * @throws InvalidMoveException if the move is not valid.
+   * @throws InvalidMoveException if 
+   *         - Origin is empty
+   *         - Not this player's turn yet
+   *         - Move is invalid.
    */
   public void makeMove(int srow, int scol, int drow, int dcol) {
     System.out.printf("requested move (%d, %d) to (%d, %d)\n", srow, scol, drow, dcol);

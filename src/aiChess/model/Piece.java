@@ -8,7 +8,7 @@ import java.util.Collection;
  * - who owns this piece
  * - what type of piece it is
  * - whether it has moved
- * - move logic (board, position ==> viable moves)
+ * - move logic (board, position ==> pseudo-viable moves)
  *
  * NOTE: 
  * Except for the hasMoved? property, it acts like a value class and 
@@ -76,7 +76,8 @@ public abstract class Piece {
 
   /**
    * Return all moves that can be made if this Piece is currently at
-   * (row, col) on the given board.
+   * (row, col) on the given board. 
+   * (Do not consider whether this will result in a check)
    */
   abstract Collection<Move> getAllMovesFrom(BoardModel board, int row, int col);
 }
