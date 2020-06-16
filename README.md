@@ -18,6 +18,11 @@ mvn exec:java
 
 # TODO
 ---
+1. Implement checkmate and stalemate detection.
+  - board.getAllLegalMoves(PlayerType)
+    - used for AI and checkMate/staleMate detection
+  - filter out illegal moves in ChessGameModel
+  - checkMate/staleMate detection
 2. Add tests first to make sure board generates 'correct moves'
 3. What to Add in terms of API
   - Move generate move method into Board class, since AI will need it
@@ -29,46 +34,46 @@ mvn exec:java
   - accept Position, for ease of testing?
 
 4. Implement GUI View
-5. Implement special moves: En Passant, Castling, Pawn Promotion
+5. Implement and benchmark FastLegalMove algorithm
+6. Implement special moves: En Passant, Castling, Pawn Promotion
 
 
 ##Checkmate Algorithm Idea##
 ---
-__Checkmate__ means 
-   - Your king is in check (can be attacked by enemy piece for any pseudo-legal moves).
-   - If yes, can you get out of the check
+__In check__  := king is reachable by _any_ enemy piece pseudo-legally
+__Stalemate__ := can't move, king not in check
+__Checkmate__ := can't move, king in check
 
-__InCheck Algorithm__
-0. ASSUME nobody is in checkmate yet.
-1. Calculate attackers (all enemy pieces whose move can directly attack King)
-   - Save threatened locations as well?
-2. Return these attackers
+__LegalMove Algorithm__
+1. Try each pseudo-legal moves
+2. Abandon the move if King can be reached by any enemy piece
 
-__LegalMoveAlgorithm__
-1. __Pinned pieces__ moves (Skip if being double checked?)
-   - Moves from the opponent’s sliding pieces (candidate pinning pieces)
-   - “Sliding piece” moves from my king in the opposite direction.
-   - The overlap of these two rays.
-   - If the result of (3) lands on one of my pieces, then it is pinned. (pinning piece identified as
-     well)
-   - Once all the pinned pieces are identified, remove them from the board and calculate the moves 
-     from the enemy’s pinning piece to your king. This will give you a “ray” of legal moves for each of your pinned pieces.
-   - Pinned piece legal moves = pseudo-legal-moves Union the-ray.
-2. __King__ can't move into threatened locations (target of all pseudo-legal moves by enemy)
-   - Remove King from the board, calculate threatened locations (king can't move in the direction of
-     enemy slider's attack ray!)
-3. __Any other piece__, 
-   - If not inCheck: simply generate pseudo-legal moves.
-   - If inCheck: Can we block/capture the "checking enemies"?
-    - generate all moves, try make each, and see if it will block _all_ "checking enemies"
-     - Could collect paths from "checking enemies" to king. Union of them contains "savior" moves.
-     - Store positions of the "checking enemies" themselves in the path too, making a move to that
-        location represents "capturing the checking enemy"
+__FastLegalMove Algorithm__
+1. King moves (detect in-check).
+ (a) Get its pseudo-legal moves
+ (b) Remove it, find threatened locations, subtract from (a)
+     - Anywhere an enemy piece can reach (pseudo-legally)
+     - Any enemy piece reachable by _another_ enemy piece
+     Conveniently, also determine whether king is in check
+ (c) If checked by more than 1 piece, only King moves matter. 
+     (if we don't introduce crazy moves)
 
-## Thoughts ##
----
-1. For checkmate detection. Can we simply check if there is any legal move? 
-   In other words, can we assume no-legal-move iff is-checkmate?
+2. Identify pinned pieces
+ (a) Find pieces threatened by enemy sliders (TODO isSlider method)
+ (b) Put slider on King's position, can it still reach corresponding piece?
+ (c) If yes, it's pinned by that slider.
+
+3. If not in check:
+ (a) Pinned piece moves: to/from the pinning piece.
+     - remove pinned piece from board
+     - calculate path from pinning piece to King (TODO pathTo method)
+ (b) others: generate pseudo-legal moves.
+
+4. If in check
+ (a) Pinned piece can't move
+ (b) others: must capture or block the checking enemy, based on its type.
+     - slider, can be captured or blocked.
+     - non-slider, must be captured
 
 
 ## Resources ##
