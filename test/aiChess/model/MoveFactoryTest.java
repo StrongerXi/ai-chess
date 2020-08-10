@@ -27,6 +27,41 @@ public class MoveFactoryTest {
    * - the move logic does not care about the specific type of piece
    * - top player's pieces will be written as uppercase in comments. */ 
 
+  /* test move with source == target */
+  @Test
+  public void testSelfMove() {
+    // _ K
+    // _ _ 
+    var pos11 = new Position(1, 1); 
+    var king = Optional.of(PieceFactory.makePiece(PieceType.KING, PlayerType.TOP_PLAYER));
+    var move = MoveFactory.makeRegularMove(pos11, pos11);
+    this.board.setPieceAt(1, 1, king);
+
+    move.apply(this.board);
+    for (int row = 0; row < board.height; row += 1) {
+      for (int col = 0; col < board.width; col += 1) {
+        var pos = new Position(row, col);
+        if (row == 1 && col == 1) {
+          assertEquals("king tile at " + pos, king, board.getPieceAt(row, col));
+        } else {
+          assertEquals("empty tile at " + pos, Optional.empty(), board.getPieceAt(row, col));
+        }
+      }
+    }
+
+    move.undo(this.board);
+    for (int row = 0; row < board.height; row += 1) {
+      for (int col = 0; col < board.width; col += 1) {
+        var pos = new Position(row, col);
+        if (row == 1 && col == 1) {
+          assertEquals("king tile at " + pos, king, board.getPieceAt(row, col));
+        } else {
+          assertEquals("empty tile at " + pos, Optional.empty(), board.getPieceAt(row, col));
+        }
+      }
+    }
+  }
+
 
   /* test apply and undo methods of regular move */
   @Test
