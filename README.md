@@ -23,12 +23,10 @@ mvn exec:java
   - Move generate move method into Board class, since AI will need it
   - Add getAllThreatenedLocation(PlayerType player) method to Board class
 
-4. Refine move generation
-  - No move into check; pinned pieces
-    - Default into board move generation
-  - Report checkmate, record state in GameModel.
-    - Check at board construction.
-    - Check at end of each move.
+4. clean up documentation and codebase
+  - RegularMove class
+  - remove redundant hashcode/equal methods
+  - accept Position, for ease of testing?
 
 4. Implement GUI View
 5. Implement special moves: En Passant, Castling, Pawn Promotion
