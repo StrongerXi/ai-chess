@@ -3,6 +3,7 @@ package aiChess.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Iterator;
 
 import aiChess.model.error.InvalidPositionException;
 
@@ -30,11 +31,11 @@ final class BoardModel {
 
   /**
    * Initialize a board with given width and height.
-   * @param width max number of pieces placed in a row
    * @param height max number of pieces placed in a column
+   * @param width max number of pieces placed in a row
    * @throws IllegalArgumentException
    */
-  BoardModel(int width, int height) {
+  BoardModel(int height, int width) {
     if (width < 0 || height < 0) {
       String msg = String.format(
             "Board dimensions can't be negative: width = %d, height = %d\n", 
@@ -69,6 +70,88 @@ final class BoardModel {
       throw new InvalidPositionException(row, col);
     }
     this.board[row][col] = replacement.isPresent() ? replacement.get() : null;
+  }
+
+  /**
+   * Return all the legal moves for `player`.
+   */
+  public Collection<Move> getAllLegalMoves(PlayerType player) {
+    var legalMoves = new ArrayList<Move>();
+    var opponent = (player == PlayerType.TOP_PLAYER) ?
+                   PlayerType.BOTTOM_PLAYER : PlayerType.TOP_PLAYER;
+    // locate king and collect positions of opponent pieces
+    var opponentPositions = new ArrayList<Position>();
+    Position kingPosHolder = null;
+    for (int row = 0; row < this.height; row += 1) {
+      for (int col = 0; col < this.width; col += 1) {
+        var piece = this.board[row][col];
+        if (piece == null) {
+          continue;
+
+        } else if (piece.owner == opponent) {
+          opponentPositions.add(new Position(row, col));
+
+        } else if (piece.type == PieceType.KING) {
+          kingPosHolder = new Position(row, col);
+        }
+      }
+    }
+    if (kingPosHolder == null) {
+      return legalMoves; // king was captured, `player` already lost
+    }
+    final var kingPos = kingPosHolder; // to make lambda happy...
+    // try each pseudo-legal move, and collect if legal
+    for (int row = 0; row < this.height; row += 1) {
+      for (int col = 0; col < this.width; col += 1) {
+        var piece = this.board[row][col];
+        if (piece == null || piece.owner != player) {
+          continue;
+        }
+        piece.getAllMovesFrom(this, row, col).stream()
+          .filter(m -> this.isMoveLegal(m, opponentPositions, kingPos))
+          .forEach(legalMoves::add);
+      }
+    }
+    return legalMoves;
+  }
+
+  /**
+   * Check whether `move` is a legal move, that is, it
+   * - Captures the opponent King
+   * - OR Will not endanger its own King.
+   * ASSUME:
+   * - `move` is a pseudo-legal move for `this` board
+   * - `opponentPositions` contains positions of all the opponent pieces
+   * - `kingPos` is where the moving player's King is.
+   */
+  private boolean isMoveLegal(Move move, Iterable<Position> opponentPositions, Position kingPos) {
+    // need to update `kingPos` in case `move` moves king
+    var srcPiece = this.board[move.sourcePos.row][move.sourcePos.col];
+    var dstPiece = this.board[move.targetPos.row][move.targetPos.col];
+    var fKingPos = srcPiece.type == PieceType.KING ? move.targetPos : kingPos; // make lambda happy...
+    // `move` captures opponent king (remember it must be pseudo-legal)
+    if (dstPiece != null && dstPiece.type == PieceType.KING) {
+      return true;
+    }
+    var opponent = (srcPiece.owner == PlayerType.TOP_PLAYER) ?
+                   PlayerType.BOTTOM_PLAYER : PlayerType.TOP_PLAYER;
+    // no opponent piece should threaten king after the move
+    move.apply(this);
+    for (int row = 0; row < this.height; row += 1) {
+      for (int col = 0; col < this.width; col += 1) {
+        var piece = this.board[row][col];
+        if (piece != null &&
+            piece.owner == opponent &&
+            piece.getAllMovesFrom(this, row, col).stream()
+            .anyMatch(m -> m.targetPos.equals(fKingPos))) {
+          move.undo(this);
+          return false;
+        }
+      }
+    }
+    move.undo(this);
+
+    return true;
   }
 
 

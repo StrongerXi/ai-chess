@@ -3,6 +3,7 @@ package aiChess.model;
 import java.util.Optional;
 import java.util.Collection;
 import java.util.Stack;
+import java.util.stream.Collectors;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -30,7 +31,7 @@ import aiChess.model.error.InvalidUndoException;
 public final class ChessGameModel {
 
   /* The internal board representation  */
-  private final BoardModel board;
+  private BoardModel board;
   private final Stack<Move> moveHistory = new Stack<>();
   private PlayerType currentPlayer;
 
@@ -47,7 +48,15 @@ public final class ChessGameModel {
    * The chess board will be 8x8, and bottom player plays first.
    */
   public ChessGameModel() {
-    this.board = new BoardModel(WIDTH, HEIGHT);
+    restart();
+  }
+
+
+  /**
+   * Initialize the game state.
+   */
+  public void restart() {
+    this.board = new BoardModel(HEIGHT, WIDTH);
     this.currentPlayer = PlayerType.BOTTOM_PLAYER;
     /* initialize the Pieces */
     for (int col = 0; col < outterRowTypes.length; col += 1) {
@@ -61,6 +70,17 @@ public final class ChessGameModel {
       this.board.setPieceAt(board.height - 2, col, Optional.of(topPawn));
       this.board.setPieceAt(1, col, Optional.of(bottomPawn));
     }
+  }
+
+
+  /**
+   * Construct the game with given state, for purposes such as testing.
+   * @param board will be used as the current board configuration.
+   * @param player will be used as the current player (to make next move)
+   */
+  ChessGameModel(BoardModel board, PlayerType player) {
+    this.board = board;
+    this.currentPlayer = player;
   }
 
 
@@ -94,7 +114,15 @@ public final class ChessGameModel {
 
 
   /**
-   * Returns all the positions that the Piece at (row, col) can move to.
+   * Return true if the current player has no more legal moves.
+   */
+  public boolean isGameOver() {
+    return this.board.getAllLegalMoves(this.currentPlayer).isEmpty();
+  }
+
+
+  /**
+   * Returns all the positions that the Piece at (row, col) can legally move to.
    * @param pos the origin position represented as (row, col)
    * @throws InvalidPositionException if (row, col) is out of bound.
    * NOTE if (row, col) contains no piece, or it's not its owner's turn yet,
@@ -104,16 +132,11 @@ public final class ChessGameModel {
     if (row < 0 || row >= board.height || col < 0 || col >= board.width) {
       throw new InvalidPositionException(row, col);
     }
-    /* return only reachable positions */
-    Collection<Position> targets = new ArrayList<>();
-    Optional<Piece> origin = this.getPieceAt(row, col);
-    // collect all reachable target position if any move is possible
-    if (origin.isPresent() && origin.get().owner == this.currentPlayer) {
-      for (Move m : origin.get().getAllMovesFrom(this.board, row, col)) {
-        targets.add(m.targetPos);
-      }
-    }
-    return targets;
+    var sourcePos = new Position(row, col);
+    return
+      this.board.getAllLegalMoves(this.currentPlayer).stream()
+      .filter(m -> m.sourcePos.equals(sourcePos))
+      .map(m -> m.targetPos).collect(Collectors.toList());
   }
 
 
