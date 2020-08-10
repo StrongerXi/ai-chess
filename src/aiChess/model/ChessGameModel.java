@@ -31,7 +31,7 @@ import aiChess.model.error.InvalidUndoException;
 public final class ChessGameModel {
 
   /* The internal board representation  */
-  private final BoardModel board;
+  private BoardModel board;
   private final Stack<Move> moveHistory = new Stack<>();
   private PlayerType currentPlayer;
 
@@ -48,6 +48,14 @@ public final class ChessGameModel {
    * The chess board will be 8x8, and bottom player plays first.
    */
   public ChessGameModel() {
+    restart();
+  }
+
+
+  /**
+   * Initialize the game state.
+   */
+  public void restart() {
     this.board = new BoardModel(HEIGHT, WIDTH);
     this.currentPlayer = PlayerType.BOTTOM_PLAYER;
     /* initialize the Pieces */

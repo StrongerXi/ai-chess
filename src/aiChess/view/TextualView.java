@@ -94,6 +94,7 @@ public class TextualView implements ChessView {
   private Optional<ChessViewListener> listener = Optional.empty();
   private Optional<ChessGameModel> model = Optional.empty();
   private Scanner scan;
+  private boolean running = false;
 
   /**
    * Initiate the Viewer with a board of given configuration.
@@ -156,9 +157,9 @@ public class TextualView implements ChessView {
    */
   @Override
   public void beginInteraction() {
-    /* output initial state first */
+    this.running = true;
     model.ifPresent(model -> {
-      while (true) {
+      while (this.running) {
         display();
 
         try {
@@ -308,5 +309,24 @@ public class TextualView implements ChessView {
   @Override
   public void setListener(ChessViewListener listener) {
     this.listener = Optional.ofNullable(listener);
+  }
+
+
+  @Override
+  public GameOverOption gameOverPrompt(PlayerType player) {
+    var winner = (player == PlayerType.TOP_PLAYER) ? "<top>" : "<bottom>";
+    this.showMessage("The game is over, player " + winner + " won\n");
+    this.showMessage("Enter 'r' to restart, else to quit.\n");
+    String token = this.scan.next();
+    switch (token) {
+      case "r": return GameOverOption.RESTART;
+      default : return GameOverOption.QUIT;
+    }
+  }
+
+
+  @Override
+  public void stopInteraction() {
+    this.running = false;
   }
 }

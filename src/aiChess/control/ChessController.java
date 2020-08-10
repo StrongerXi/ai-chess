@@ -2,6 +2,7 @@ package aiChess.control;
 
 import aiChess.view.ChessViewListener;
 import aiChess.view.ChessView;
+import aiChess.view.GameOverOption;
 import aiChess.model.ChessGameModel;
 import aiChess.model.error.InvalidUndoException;
 import aiChess.model.error.InvalidMoveException;
@@ -38,8 +39,26 @@ public class ChessController implements ChessViewListener {
    */
   public void moveRequested(int srow, int scol, int trow, int tcol) {
     try {
+      var player = this.model.getCurrentPlayer();
       this.model.makeMove(srow, scol, trow, tcol);
-
+      if (this.model.isGameOver()) {
+        this.view.refresh();
+        var option = this.view.gameOverPrompt(player);
+        switch (option) {
+          case RESTART: {
+            this.view.showMessage("Restarting...\n");
+            this.model.restart();
+            return;
+          }
+          case QUIT: {
+            this.view.showMessage("Quitting...\n");
+            this.view.stopInteraction();
+            return;
+          }
+          default:
+            throw new RuntimeException("Unknown game over option: " + option.toString());
+        }
+      }
     } catch (InvalidMoveException e) {
       this.view.showMessage(e.getMessage());
     }

@@ -1,6 +1,7 @@
 package aiChess.view;
 
 import aiChess.model.ChessGameModel;
+import aiChess.model.PlayerType;
 
 /**
  * General View interface for a Chess Game.
@@ -41,4 +42,17 @@ public interface ChessView {
    * Refresh the output and reflect most updated state of model.
    */
   void refresh();
+
+  /**
+   * Signal gameover to the player, and prompt player to select a
+   * `GameOverOption`.
+   * @param winner is the winning player
+   */
+   GameOverOption gameOverPrompt(PlayerType winner);
+
+
+   /**
+    * Shut down the view application.
+    */
+   void stopInteraction();
 }
