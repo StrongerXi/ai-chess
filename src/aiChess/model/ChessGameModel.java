@@ -106,6 +106,14 @@ public final class ChessGameModel {
 
 
   /**
+   * Return true if the current player has no more legal moves.
+   */
+  public boolean isGameOver() {
+    return this.board.getAllLegalMoves(this.currentPlayer).isEmpty();
+  }
+
+
+  /**
    * Returns all the positions that the Piece at (row, col) can legally move to.
    * @param pos the origin position represented as (row, col)
    * @throws InvalidPositionException if (row, col) is out of bound.

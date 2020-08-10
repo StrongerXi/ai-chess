@@ -152,4 +152,66 @@ public class ChessGameModelTest {
     assertEquals("check bottom pawn moves", botPawnExpectMoves, new HashSet<>(botPawnActualMoves));
     assertEquals("check duplicates in bottom pawn moves", botPawnExpectMoves.size(), botPawnActualMoves.size());
   }
+
+
+  /* Test `isGameOver` for an initial 8x8 board*/
+  @Test
+  public void testIsGameOverInitial() {
+    var game = new ChessGameModel();
+    assertEquals("Initial game gameover test", false, game.isGameOver());
+  }
+
+  @Test
+  public void testIsGameOverComplex() {
+    // 5 _ _ _ K _ _
+    // 4 _ B _ _ _ _
+    // 3 _ _ _ _ _ _
+    // 2 _ _ _ _ _ _
+    // 1 _ _ _ _ Q _
+    // 0 _ _ q k b n
+    //   0 1 2 3 4 5
+    // Classic checkmate
+    var board = new BoardModel(6, 6);
+
+    var topKing = Optional.of(PieceFactory.makePiece(PieceType.KING, PlayerType.TOP_PLAYER));
+    var topQueen = Optional.of(PieceFactory.makePiece(PieceType.QUEEN, PlayerType.TOP_PLAYER));
+    var topBishop = Optional.of(PieceFactory.makePiece(PieceType.BISHOP, PlayerType.TOP_PLAYER));
+
+    var botKing = Optional.of(PieceFactory.makePiece(PieceType.KING, PlayerType.BOTTOM_PLAYER));
+    var botBishop = Optional.of(PieceFactory.makePiece(PieceType.BISHOP, PlayerType.BOTTOM_PLAYER));
+    var botQueen = Optional.of(PieceFactory.makePiece(PieceType.QUEEN, PlayerType.BOTTOM_PLAYER));
+    var botKnight = Optional.of(PieceFactory.makePiece(PieceType.KNIGHT, PlayerType.BOTTOM_PLAYER));
+
+    var topKingPos   = new Position(5, 3);
+    var topQueenPos  = new Position(1, 4);
+    var topBishopPos = new Position(4, 1);
+
+    var botQueenPos  = new Position(0, 2);
+    var botKingPos   = new Position(0, 3);
+    var botBishopPos = new Position(0, 4);
+    var botKnightPos = new Position(0, 5);
+
+    board.setPieceAt(5, 3, topKing);
+    board.setPieceAt(1, 4, topQueen);
+    board.setPieceAt(4, 1, topBishop);
+
+    board.setPieceAt(0, 2, botQueen);
+    board.setPieceAt(0, 3, botKing);
+    board.setPieceAt(0, 4, botBishop);
+    board.setPieceAt(0, 5, botKnight);
+
+    var game = new ChessGameModel(board, PlayerType.BOTTOM_PLAYER);
+    assertEquals("Bottom player checkmated", true, game.isGameOver());
+
+    // 5 _ _ _ K _ _
+    // 4 _ B _ _ _ _
+    // 3 _ _ _ _ _ _
+    // 2 _ _ _ _ _ _
+    // 1 _ _ _ _ Q _
+    // 0 _ _ _ k b n
+    //   0 1 2 3 4 5
+    // Removing bottom queen allows king to escape
+    board.setPieceAt(0, 2, Optional.empty());
+    assertEquals("Bottom king can escape, no checkmate", false, game.isGameOver());
+  }
 }
