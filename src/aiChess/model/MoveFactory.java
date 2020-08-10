@@ -52,19 +52,19 @@ final class MoveFactory {
       this.moveStatus = sourcePiece.get().hasMoved();
       sourcePiece.get().setMoved(true);
 
-      /* move source piece to target location */
-      model.setPieceAt(targetPos.row, targetPos.col, sourcePiece);
       /* make source location empty */
       model.setPieceAt(sourcePos.row, sourcePos.col, Optional.empty());
+      /* move source piece to target location */
+      model.setPieceAt(targetPos.row, targetPos.col, sourcePiece);
     }
 
     @Override
     void undo(BoardModel model) {
       Optional<Piece> sourcePiece = model.getPieceAt(targetPos.row, targetPos.col);
-      /* move source piece to source location */
-      model.setPieceAt(sourcePos.row, sourcePos.col, sourcePiece);
       /* move saved target piece to target location */
       model.setPieceAt(targetPos.row, targetPos.col, this.targetPiece);
+      /* move source piece to source location */
+      model.setPieceAt(sourcePos.row, sourcePos.col, sourcePiece);
       /* clear saved info from last apply */
       targetPiece = Optional.empty();
       this.lastApplied = false;
