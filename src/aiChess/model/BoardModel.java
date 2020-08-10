@@ -30,11 +30,11 @@ final class BoardModel {
 
   /**
    * Initialize a board with given width and height.
-   * @param width max number of pieces placed in a row
    * @param height max number of pieces placed in a column
+   * @param width max number of pieces placed in a row
    * @throws IllegalArgumentException
    */
-  BoardModel(int width, int height) {
+  BoardModel(int height, int width) {
     if (width < 0 || height < 0) {
       String msg = String.format(
             "Board dimensions can't be negative: width = %d, height = %d\n", 

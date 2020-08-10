@@ -47,7 +47,7 @@ public final class ChessGameModel {
    * The chess board will be 8x8, and bottom player plays first.
    */
   public ChessGameModel() {
-    this.board = new BoardModel(WIDTH, HEIGHT);
+    this.board = new BoardModel(HEIGHT, WIDTH);
     this.currentPlayer = PlayerType.BOTTOM_PLAYER;
     /* initialize the Pieces */
     for (int col = 0; col < outterRowTypes.length; col += 1) {
