@@ -107,15 +107,22 @@ public class SwingView implements ChessView {
       var restartButton = new JButton("Restart");
       var saveButton = new JButton("Save");
       var loadButton = new JButton("Load");
+      var undoButton = new JButton("Undo");
 
       // TODO support these actions
       restartButton.addActionListener(e -> {});
       saveButton.addActionListener(e -> {});
       loadButton.addActionListener(e -> {});
+      undoButton.addActionListener(e -> this.listener.ifPresent(l ->  {
+        l.undoRequested();
+        this.lastSelected = Optional.empty();
+        this.refresh();
+      }));
 
       toolbar.add(restartButton);
       toolbar.add(saveButton);
       toolbar.add(loadButton);
+      toolbar.add(undoButton);
       // toolbar.addSeparator();
       return toolbar;
     };
