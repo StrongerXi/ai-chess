@@ -11,31 +11,21 @@ To build the project, go to root of the project and type the following via CLI
 mvn compile
 ```
 
-To run the application, type:
+To run the application and see user instructions:
 ```
-mvn exec:java
+./run --help
 ```
 
 # TODO
 ---
-1. Implement checkmate and stalemate detection.
-  - board.getAllLegalMoves(PlayerType)
-    - used for AI and checkMate/staleMate detection
-  - filter out illegal moves in ChessGameModel
-  - checkMate/staleMate detection
-2. Add tests first to make sure board generates 'correct moves'
-3. What to Add in terms of API
-  - Move generate move method into Board class, since AI will need it
-  - Add getAllThreatenedLocation(PlayerType player) method to Board class
-
-4. clean up documentation and codebase
+- Make Piece immutable
+- Add AI component
+- clean up documentation and codebase
   - RegularMove class
   - remove redundant hashcode/equal methods
   - accept Position, for ease of testing?
-
-4. Implement GUI View
-5. Implement and benchmark FastLegalMove algorithm
-6. Implement special moves: En Passant, Castling, Pawn Promotion
+- Implement and benchmark FastLegalMove algorithm
+- Implement special moves: En Passant, Castling, Pawn Promotion
 
 
 ##Checkmate Algorithm Idea##

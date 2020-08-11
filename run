@@ -1,0 +1,4 @@
+#!/bin/sh
+args="$@"
+
+mvn compile exec:java -Dexec.args="$args"
