@@ -231,31 +231,42 @@ public class SwingView implements ChessView {
     });
   }
 
+  /**
+   * Blend the 2 given colors, assigning `w1` to the first color.
+   * ASSUME firstWeight ∈ [0, 1]
+   */
+  private static Color blendColors(Color c1, Color c2, float w1) {
+    float w2 = 1 - w1;
+    return new Color(
+        (int)(c1.getRed() * w1   + c2.getRed() * w2),
+        (int)(c1.getGreen() * w1 + c2.getGreen() * w2),
+        (int)(c1.getBlue() * w1  + c2.getBlue() * w2));
+  }
+
   /*
    * Change the char surrounding background color for Piece at (row, col) on Chess Board
    * based on the given TileState.
    */
   private void setBackgroundAt(int row, int col, TileState state) {
     var button = this.boardButtons[row][col];
+    var color = row % 2 == col % 2 ? Color.GRAY : Color.WHITE;
     switch(state) {
       case REACHABLE: {
-        button.setBackground(Color.GREEN);
+        color = blendColors(color, Color.GREEN, 0.6f);
         break;
       }
       case ATTACKABLE: {
-        button.setBackground(Color.RED);
+        color = blendColors(color, Color.RED, 0.6f);
         break;
       }
       case SELECTED: {
-        button.setBackground(Color.YELLOW);
+        color = blendColors(color, Color.YELLOW, 0.6f);
         break;
       }
-      case NORMAL: {
-        button.setBackground(row % 2 == col % 2 ? Color.GRAY : Color.WHITE);
-        break;
-      }
+      case NORMAL: break;
       default:
         throw new RuntimeException("TileState not recognized\n");
     }
+    button.setBackground(color);
   }
 }
