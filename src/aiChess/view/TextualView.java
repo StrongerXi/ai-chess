@@ -166,6 +166,7 @@ public class TextualView implements ChessView {
           String token = scan.next();
           if (token.equals("undo")) {
             this.listener.ifPresent(l -> l.undoRequested());
+            this.lastSelected = Optional.empty();
             this.synchWithModel(model);
             continue;
           } 
