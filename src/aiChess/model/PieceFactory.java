@@ -19,138 +19,156 @@ final class PieceFactory {
    * Produce an instance of the piece with given configuration.
    */
   public static Piece makePiece(PieceType type, PlayerType player) {
+    return makePieceMoved(type, player, false); // default to not moved
+  }
+
+  /**
+   * For testing purposes
+   */
+  static Piece makePieceMoved(PieceType type, PlayerType player, boolean hasMoved) {
     switch(type) {
-      case KING: return makeKing(player);
-      case QUEEN: return makeQueen(player);
-      case BISHOP: return makeBishop(player);
-      case KNIGHT: return makeKnight(player);
-      case CASTLE: return makeCastle(player);
-      case PAWN: return makePawn(player);
+      case KING:   return new King(player, hasMoved);
+      case QUEEN:  return new Queen(player, hasMoved);
+      case BISHOP: return new Bishop(player, hasMoved);
+      case KNIGHT: return new Knight(player, hasMoved);
+      case CASTLE: return new Castle(player, hasMoved);
+      case PAWN:   return new Pawn(player, hasMoved);
       default: throw new RuntimeException("PieceType not recognized\n");
     }
   }
 
 
-  /* The following methods return anonymous Piece instances with 
-   * move logic corresponding to the specific type of piece they represent. */
-  private static Piece makeKing(PlayerType player) {
-    return new Piece(player, PieceType.KING) {
-      public Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
-        Collection<Move> moves = new ArrayList<>();
-        addCrossMoves(model, player, new Position(row, col), 1, moves);
-        addDiagonalMoves(model, player, new Position(row, col), 1, moves);
-        return moves;
-      }
-    };
+  /*---------------------------------------------------------------------------
+   * The following classes are Piece instances with move logic corresponding to 
+   * the specific type of piece they represent.
+   *--------------------------------------------------------------------------- */
+
+  private static final class King extends Piece {
+    King(PlayerType owner, boolean hasMoved) {
+      super(owner, PieceType.KING, hasMoved);
+    }
+    Piece setMoved(boolean state) {
+      return (state == super.hasMoved) ? this : new King(owner, state);
+    }
+    public Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
+      Collection<Move> moves = new ArrayList<>();
+      addCrossMoves(model, owner, new Position(row, col), 1, moves);
+      addDiagonalMoves(model, owner, new Position(row, col), 1, moves);
+      return moves;
+    }
   }
 
 
-  private static Piece makeQueen(PlayerType player) {
-    return new Piece(player, PieceType.QUEEN) {
-      public Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
-        /* There is no step size limit for Queen */
-        Collection<Move> moves = new ArrayList<>();
-        Position origin = new Position(row, col);
-        addCrossMoves(model, player, origin, MAX_STEP, moves);
-        addDiagonalMoves(model, player, origin, MAX_STEP, moves);
-        return moves;
-      }
-    };
+  private static final class Queen extends Piece {
+    Queen(PlayerType owner, boolean hasMoved) {
+      super(owner, PieceType.QUEEN, hasMoved);
+    }
+    Piece setMoved(boolean state) {
+      return (state == super.hasMoved) ? this : new Queen(owner, state);
+    }
+    public Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
+      /* There is no step size limit for Queen */
+      Collection<Move> moves = new ArrayList<>();
+      Position origin = new Position(row, col);
+      addCrossMoves(model, owner, origin, MAX_STEP, moves);
+      addDiagonalMoves(model, owner, origin, MAX_STEP, moves);
+      return moves;
+    }
   }
 
 
-  private static Piece makeBishop(PlayerType player) {
-    return new Piece(player, PieceType.BISHOP) {
-      public Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
-        Collection<Move> moves = new ArrayList<>();
-        /* There is no step size limit for Bishop */
-        addDiagonalMoves(model, player, new Position(row, col), MAX_STEP, moves);
-        return moves;
-      }
-    };
+  private static final class Bishop extends Piece {
+    Bishop(PlayerType owner, boolean hasMoved) {
+      super(owner, PieceType.BISHOP, hasMoved);
+    }
+    Piece setMoved(boolean state) {
+      return (state == super.hasMoved) ? this : new Bishop(owner, state);
+    }
+    public Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
+      Collection<Move> moves = new ArrayList<>();
+      // There is no step size limit for Bishop
+      addDiagonalMoves(model, owner, new Position(row, col), MAX_STEP, moves);
+      return moves;
+    }
   }
 
 
-  private static Piece makeCastle(PlayerType player) {
-    return new Piece(player, PieceType.CASTLE) {
-      public Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
-        Collection<Move> moves = new ArrayList<>();
-        /* There is no step size limit for Castle */
-        addCrossMoves(model, player, new Position(row, col), MAX_STEP, moves);
-        return moves;
-      }
-    };
+  private static final class Castle extends Piece {
+    Castle(PlayerType owner, boolean hasMoved) {
+      super(owner, PieceType.CASTLE, hasMoved);
+    }
+    Piece setMoved(boolean state) {
+      return (state == super.hasMoved) ? this : new Castle(owner, state);
+    }
+    public Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
+      Collection<Move> moves = new ArrayList<>();
+      // There is no step size limit for Castle
+      addCrossMoves(model, owner, new Position(row, col), MAX_STEP, moves);
+      return moves;
+    }
   }
 
 
-  private static Piece makePawn(PlayerType player) {
-    return new Piece(player, PieceType.PAWN) {
+  private static final class Pawn extends Piece {
+    Pawn(PlayerType owner, boolean hasMoved) {
+      super(owner, PieceType.PAWN, hasMoved);
+    }
+    Piece setMoved(boolean state) {
+      return (state == super.hasMoved) ? this : new Pawn(owner, state);
+    }
+    public Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
 
-      public Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
+      Collection<Move> moves = new ArrayList<>();
+      Position origin = new Position(row, col);
 
-        Collection<Move> moves = new ArrayList<>();
-        Position origin = new Position(row, col);
+      // top owner's pawn only moves downward
+      int offset = this.owner == PlayerType.TOP_PLAYER ? -1 : 1;
+      int nextRow = row + offset;
 
-        /* top player's pawn only moves downward */
-        int offset = this.owner == PlayerType.TOP_PLAYER ? -1 : 1;
-        int nextRow = row + offset;
+      // consider the immediate forward spot
+      if (0 <= nextRow && nextRow < model.height) {
+        if (model.getPieceAt(row + offset, col).isEmpty()) {
+          moves.add(MoveFactory.makeRegularMove(origin, new Position(nextRow, col)));
 
-        /* consider the immediate forward spot */
-        if (0 <= nextRow && nextRow < model.height) {
-          Optional<Piece> target = model.getPieceAt(row + offset, col);
-          if (target.isEmpty()) {
-            moves.add(MoveFactory.makeRegularMove(origin, new Position(nextRow, col)));
-
-            /* If pawn has not moved, and its forward position is empty
-             * also consider a 2-step jump */
-            if (!super.hasMoved()) {
-              nextRow += offset;
-              if (0 <= nextRow && nextRow < model.height) {
-                target = model.getPieceAt(nextRow, col);
-                if (target.isEmpty()) {
-                  moves.add(MoveFactory.makeRegularMove(origin, new Position(nextRow, col)));
-                }
-              }
-            }
+          // consider a 2-step jump
+          nextRow += offset;
+          if (!super.hasMoved && 
+              0 <= nextRow && nextRow < model.height &&
+              model.getPieceAt(nextRow, col).isEmpty()) {
+              moves.add(MoveFactory.makeRegularMove(origin, new Position(nextRow, col)));
           }
+          nextRow -= offset; // make sure `nextRow = row + offset` on exit
+        }
 
-          /* also consider diagonal attacks */
-
-          /* left */
-          if (col-1 >= 0) {
-            target = model.getPieceAt(row + offset, col - 1);
+        // consider left/right diagonal attacks
+        for (int nextCol = col - 1; nextCol <= col + 1; nextCol += 2) {
+          if (0 <= nextCol && nextCol < model.height) {
+            var target = model.getPieceAt(nextRow, nextCol);
             if (target.isPresent() && target.get().owner != this.owner) {
-              moves.add(MoveFactory.makeRegularMove(origin, new Position(row+offset, col-1)));
-            }
-          }
-
-          /* right */
-          if (col+1 < model.width) {
-            target = model.getPieceAt(row + offset, col + 1);
-            if (target.isPresent() && target.get().owner != this.owner) {
-              moves.add(MoveFactory.makeRegularMove(origin, new Position(row+offset, col+1)));
+              moves.add(MoveFactory.makeRegularMove(origin, new Position(nextRow, nextCol)));
             }
           }
         }
-        return moves;
       }
-
-    };
+      return moves;
+    }
   }
-
 
 
   private static final int[][] knightOffsets = new int[][]{{1, -2}, {2, -1}, {2, 1}, {1, 2}, {-1, 2}, {-2, 1}, {-2, -1}, {-1, -2}};
-  private static Piece makeKnight(PlayerType player) {
-    return new Piece(player, PieceType.KNIGHT) {
-      public Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
-        Collection<Move> moves = new ArrayList<>();
-        addMovesInDirection(model, player, new Position(row, col), knightOffsets, 1, moves);
-        return moves;
-      }
-    };
+  private static final class Knight extends Piece {
+    Knight(PlayerType owner, boolean hasMoved) {
+      super(owner, PieceType.KNIGHT, hasMoved);
+    }
+    Piece setMoved(boolean state) {
+      return (state == super.hasMoved) ? this : new Knight(owner, state);
+    }
+    Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
+      Collection<Move> moves = new ArrayList<>();
+      addMovesInDirection(model, owner, new Position(row, col), knightOffsets, 1, moves);
+      return moves;
+    }
   }
-
 
 
 
@@ -169,10 +187,10 @@ final class PieceFactory {
    * @param player is the owner of the piece
    * @param validMoves will store all the valid moves.
    */
-  private static void addCrossMoves(BoardModel model, 
-                                    PlayerType player, 
-                                    Position origin, 
-                                    int maxStep, 
+  private static void addCrossMoves(BoardModel model,
+                                    PlayerType player,
+                                    Position origin,
+                                    int maxStep,
                                     Collection<Move> validMoves) {
     addMovesInDirection(model, player, origin, crossOffsets, maxStep, validMoves);
   }
@@ -188,10 +206,10 @@ final class PieceFactory {
    * @param player is the owner of the piece
    * @param validMoves will store all the valid moves.
    */
-  private static void addDiagonalMoves(BoardModel model, 
-                                       PlayerType player, 
-                                       Position origin, 
-                                       int maxStep, 
+  private static void addDiagonalMoves(BoardModel model,
+                                       PlayerType player,
+                                       Position origin,
+                                       int maxStep,
                                        Collection<Move> validMoves) {
     addMovesInDirection(model, player, origin, diagonalOffsets, maxStep, validMoves);
   }
@@ -208,11 +226,11 @@ final class PieceFactory {
    * @param maxStep is the maximum step the piece can move
    * @param validMoves will store all the valid moves.
    */
-  private static void addMovesInDirection(BoardModel model, 
-                                          PlayerType player, 
-                                          Position origin, 
+  private static void addMovesInDirection(BoardModel model,
+                                          PlayerType player,
+                                          Position origin,
                                           int[][] offsets,
-                                          int maxStep, 
+                                          int maxStep,
                                           Collection<Move> validMoves) {
 
     int oriRow = origin.row, oriCol = origin.col;
@@ -225,8 +243,9 @@ final class PieceFactory {
       /* number of steps taken in (dr, dc) direction */
       int steps = 1;
       for (int row = oriRow + dr, col = oriCol + dc;  /* do not include origin */
-           0 <= col && col < model.width && 0 <= row && row < model.height
-           && steps <= maxStep;
+           0 <= col && col < model.width &&
+           0 <= row && row < model.height &&
+           steps <= maxStep;
            row += dr, col += dc, steps += 1) {
 
         Optional<Piece> target = model.getPieceAt(row, col);
@@ -243,5 +262,3 @@ final class PieceFactory {
     }
   }
 }
-
-

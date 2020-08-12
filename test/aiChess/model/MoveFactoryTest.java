@@ -34,6 +34,7 @@ public class MoveFactoryTest {
     // _ _ 
     var pos11 = new Position(1, 1); 
     var king = Optional.of(PieceFactory.makePiece(PieceType.KING, PlayerType.TOP_PLAYER));
+    var kingMoved = Optional.of(PieceFactory.makePieceMoved(PieceType.KING, PlayerType.TOP_PLAYER, true));
     var move = MoveFactory.makeRegularMove(pos11, pos11);
     this.board.setPieceAt(1, 1, king);
 
@@ -42,7 +43,7 @@ public class MoveFactoryTest {
       for (int col = 0; col < board.width; col += 1) {
         var pos = new Position(row, col);
         if (row == 1 && col == 1) {
-          assertEquals("king tile at " + pos, king, board.getPieceAt(row, col));
+          assertEquals("king tile at " + pos, kingMoved, board.getPieceAt(row, col));
         } else {
           assertEquals("empty tile at " + pos, Optional.empty(), board.getPieceAt(row, col));
         }
@@ -92,6 +93,11 @@ public class MoveFactoryTest {
     Piece topCastle = PieceFactory.makePiece(PieceType.CASTLE, PlayerType.TOP_PLAYER);
     Piece topKnight = PieceFactory.makePiece(PieceType.KNIGHT, PlayerType.TOP_PLAYER);
 
+    Piece bottomPawnMoved = PieceFactory.makePieceMoved(PieceType.PAWN, PlayerType.BOTTOM_PLAYER, true);
+    Piece topBishopMoved = PieceFactory.makePieceMoved(PieceType.BISHOP, PlayerType.TOP_PLAYER, true);
+    Piece topCastleMoved = PieceFactory.makePieceMoved(PieceType.CASTLE, PlayerType.TOP_PLAYER, true);
+    Piece topKnightMoved = PieceFactory.makePieceMoved(PieceType.KNIGHT, PlayerType.TOP_PLAYER, true);
+
     this.board.setPieceAt(1, 1, Optional.of(bottomPawn));
     this.board.setPieceAt(2, 2, Optional.of(topBishop));
     this.board.setPieceAt(3, 1, Optional.of(topCastle));
@@ -100,59 +106,47 @@ public class MoveFactoryTest {
     /* apply move, query board state, undo move, query board state */
     castleRight.apply(this.board);
     assertEquals("move source empty\n", Optional.empty(), board.getPieceAt(3, 1));
-    assertEquals("move target becomes castle\n", Optional.of(topCastle), board.getPieceAt(3, 3));
-    assertEquals(true, topCastle.hasMoved());
+    assertEquals("move target becomes castle\n", Optional.of(topCastleMoved), board.getPieceAt(3, 3));
     castleRight.undo(this.board);
     assertEquals("move source back to castle\n", Optional.of(topCastle), board.getPieceAt(3, 1));
     assertEquals("move target back to empty\n", Optional.empty(), board.getPieceAt(3, 3));
-    assertEquals(false, topCastle.hasMoved());
 
     bishopDown.apply(this.board);
     assertEquals("move source empty\n", Optional.empty(), board.getPieceAt(2, 2));
-    assertEquals("move target becomes pawn\n", Optional.of(topBishop), board.getPieceAt(1, 2));
-    assertEquals(true, topBishop.hasMoved());
+    assertEquals("move target becomes pawn\n", Optional.of(topBishopMoved), board.getPieceAt(1, 2));
     bishopDown.undo(this.board);
     assertEquals("move source back to pawn\n", Optional.of(topBishop), board.getPieceAt(2, 2));
     assertEquals("move target back to empty\n", Optional.empty(), board.getPieceAt(1, 2));
-    assertEquals(false, topBishop.hasMoved());
 
     /* do the same to move with attack */
 
     castleAttack.apply(this.board);
     assertEquals("move source empty\n", Optional.empty(), board.getPieceAt(3, 1));
-    assertEquals("move target becomes castle\n", Optional.of(topCastle), board.getPieceAt(1, 1));
-    assertEquals(true, topCastle.hasMoved());
+    assertEquals("move target becomes castle\n", Optional.of(topCastleMoved), board.getPieceAt(1, 1));
     castleAttack.undo(this.board);
     assertEquals("move source back to castle\n", Optional.of(topCastle), board.getPieceAt(3, 1));
     assertEquals("move target back to pawn\n", Optional.of(bottomPawn), board.getPieceAt(1, 1));
-    assertEquals(false, topCastle.hasMoved());
 
     pawnAttack.apply(this.board);
     assertEquals("move source empty\n", Optional.empty(), board.getPieceAt(1, 1));
-    assertEquals("move target becomes pawn\n", Optional.of(bottomPawn), board.getPieceAt(2, 2));
-    assertEquals(true, bottomPawn.hasMoved());
+    assertEquals("move target becomes pawn\n", Optional.of(bottomPawnMoved), board.getPieceAt(2, 2));
     pawnAttack.undo(this.board);
     assertEquals("move source back to pawn\n", Optional.of(bottomPawn), board.getPieceAt(1, 1));
     assertEquals("move target back to bishop\n", Optional.of(topBishop), board.getPieceAt(2, 2));
-    assertEquals(false, bottomPawn.hasMoved());
 
     bishopAttack.apply(this.board);
     assertEquals("move source empty\n", Optional.empty(), board.getPieceAt(2, 2));
-    assertEquals("move target becomes bishop\n", Optional.of(topBishop), board.getPieceAt(1, 1));
-    assertEquals(true, topBishop.hasMoved());
+    assertEquals("move target becomes bishop\n", Optional.of(topBishopMoved), board.getPieceAt(1, 1));
     bishopAttack.undo(this.board);
     assertEquals("move source back to bishop\n", Optional.of(topBishop), board.getPieceAt(2, 2));
     assertEquals("move target back to pawn\n", Optional.of(bottomPawn), board.getPieceAt(1, 1));
-    assertEquals(false, topBishop.hasMoved());
 
 
     knightAttack.apply(this.board);
     assertEquals("move source empty\n", Optional.empty(), board.getPieceAt(0, 3));
-    assertEquals("move target becomes knight\n", Optional.of(topKnight), board.getPieceAt(1, 1));
-    assertEquals(true, topKnight.hasMoved());
+    assertEquals("move target becomes knight\n", Optional.of(topKnightMoved), board.getPieceAt(1, 1));
     knightAttack.undo(this.board);
     assertEquals("move source back to knight\n", Optional.of(topKnight), board.getPieceAt(0, 3));
     assertEquals("move target back to pawn\n", Optional.of(bottomPawn), board.getPieceAt(1, 1));
-    assertEquals(false, topKnight.hasMoved());
   }
 }

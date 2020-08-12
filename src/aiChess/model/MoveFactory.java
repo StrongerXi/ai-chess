@@ -25,13 +25,9 @@ final class MoveFactory {
    */
   private static class RegularMove extends Move {
 
-    /* True iff the apply method was invoked last */
-    private boolean lastApplied = false;
-    /* the target piece from last apply, used to undo move */
+    // the source/target piece from last apply, used to undo move.
     private Optional<Piece> targetPiece = Optional.empty();
-    /* whether the source piece has moved before the last apply */
-    private boolean moveStatus = false;
-
+    private Optional<Piece> sourcePiece = Optional.empty();
 
     /**
      * Constructor.
@@ -42,33 +38,21 @@ final class MoveFactory {
 
     @Override
     void apply(BoardModel model) {
-      Optional<Piece> sourcePiece = model.getPieceAt(sourcePos.row, sourcePos.col);
-
-      /* save target piece for future undo */
-      targetPiece = model.getPieceAt(targetPos.row, targetPos.col);
-      this.lastApplied = true;
-
-      /* NOTE assume the source piece can't be empty */
-      this.moveStatus = sourcePiece.get().hasMoved();
-      sourcePiece.get().setMoved(true);
-
-      /* make source location empty */
+      // save source and target piece and mutate model
+      this.sourcePiece = model.getPieceAt(sourcePos.row, sourcePos.col);
+      this.targetPiece = model.getPieceAt(targetPos.row, targetPos.col);
       model.setPieceAt(sourcePos.row, sourcePos.col, Optional.empty());
-      /* move source piece to target location */
-      model.setPieceAt(targetPos.row, targetPos.col, sourcePiece);
+      model.setPieceAt(targetPos.row, targetPos.col, sourcePiece.map(p -> p.setMoved(true)));
     }
 
     @Override
     void undo(BoardModel model) {
-      Optional<Piece> sourcePiece = model.getPieceAt(targetPos.row, targetPos.col);
-      /* move saved target piece to target location */
+      // restore source and target piece in model
       model.setPieceAt(targetPos.row, targetPos.col, this.targetPiece);
-      /* move source piece to source location */
-      model.setPieceAt(sourcePos.row, sourcePos.col, sourcePiece);
-      /* clear saved info from last apply */
+      model.setPieceAt(sourcePos.row, sourcePos.col, this.sourcePiece);
+      // clear saved info from last apply
+      sourcePiece = Optional.empty();
       targetPiece = Optional.empty();
-      this.lastApplied = false;
-      sourcePiece.get().setMoved(this.moveStatus);
     }
 
 
