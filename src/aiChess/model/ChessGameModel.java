@@ -117,7 +117,7 @@ public final class ChessGameModel {
    * Return true if the current player has no more legal moves.
    */
   public boolean isGameOver() {
-    return this.board.getAllLegalMoves(this.currentPlayer).isEmpty();
+    return this.board.getCopy().getAllLegalMoves(this.currentPlayer).isEmpty();
   }
 
 
@@ -134,7 +134,7 @@ public final class ChessGameModel {
     }
     var sourcePos = new Position(row, col);
     return
-      this.board.getAllLegalMoves(this.currentPlayer).stream()
+      this.board.getCopy().getAllLegalMoves(this.currentPlayer).stream()
       .filter(m -> m.sourcePos.equals(sourcePos))
       .map(m -> m.targetPos).collect(Collectors.toList());
   }
