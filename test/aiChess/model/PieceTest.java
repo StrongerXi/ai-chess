@@ -38,10 +38,10 @@ public class PieceTest {
     Piece topT2Dup = PieceFactory.makePiece(t2, PlayerType.TOP_PLAYER);
     assertEquals("2 unmoved\n", topT2, topT2Dup);
 
-    topT2Dup.setMoved(true);
+    topT2Dup = topT2Dup.setMoved(true);
     assertNotEquals("1 moved 1 unmoved\n", topT2, topT2Dup);
 
-    topT2.setMoved(true);
+    topT2 = topT2.setMoved(true);
     assertEquals("2 moved\n", topT2, topT2Dup);
   }
 }

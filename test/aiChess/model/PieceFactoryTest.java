@@ -81,8 +81,8 @@ public class PieceFactoryTest {
 
 
     /* set all pawns to moved state */
-    topPawn.setMoved(true);
-    bottomPawn.setMoved(true);
+    topPawn = topPawn.setMoved(true);
+    bottomPawn = bottomPawn.setMoved(true);
 
     /* moved pawn has 1 possible moves */
     pawn51Moves = new HashSet<>(topPawn.getAllMovesFrom(this.board, 5, 1));

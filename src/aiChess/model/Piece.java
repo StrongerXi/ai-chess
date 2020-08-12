@@ -3,50 +3,48 @@ package aiChess.model;
 import java.util.Collection;
 
 /**
- * Represents a general Piece.
+ * A value class that represents a general Piece.
  * Supports query for:
  * - who owns this piece
  * - what type of piece it is
  * - whether it has moved
  * - move logic (board, position ==> pseudo-viable moves)
- *
- * NOTE: 
- * Except for the hasMoved? property, it acts like a value class and 
- * the other attributes are completely immutable.
  */
 public abstract class Piece {
 
   /* Read-Only attributes */
   public final PlayerType owner;
   public final PieceType type;
-
-  /* set to true after first move */
-  private boolean hasMoved;
-
+  public final boolean hasMoved;
 
   /**
    * Abstract constructor, can't be instantiated.
    */
   Piece(PlayerType owner, PieceType type) {
+    this(owner, type, false);
+  }
+
+  /**
+   * Abstract constructor, can't be instantiated.
+   */
+  Piece(PlayerType owner, PieceType type, boolean hasMoved) {
     this.owner = owner;
     this.type = type;
+    this.hasMoved = hasMoved;
   }
+
+  /**
+   * Return a copy of this Piece, with hasMoved updated to given state.
+   */
+  abstract Piece setMoved(boolean state);
 
 
   /**
-   * Returns true iff this piece has been moved.
+   * Return all moves that can be made if this Piece is currently at
+   * (row, col) on the given board. 
+   * (Do not consider whether this will result in a check)
    */
-  public boolean hasMoved() {
-    return this.hasMoved;
-  }
-
-
-  /**
-   * Set this Piece as already moved iff given state is true.
-   */
-  void setMoved(boolean state) {
-    this.hasMoved = state;
-  }
+  abstract Collection<Move> getAllMovesFrom(BoardModel board, int row, int col);
 
 
   @Override
@@ -70,14 +68,7 @@ public abstract class Piece {
 
   @Override
   public String toString() {
-    return String.format("(%s, %s)", owner.toString(), type.toString());
+    return String.format("(%s, %s, moved: %b)", 
+        owner.toString(), type.toString(), this.hasMoved);
   }
-
-
-  /**
-   * Return all moves that can be made if this Piece is currently at
-   * (row, col) on the given board. 
-   * (Do not consider whether this will result in a check)
-   */
-  abstract Collection<Move> getAllMovesFrom(BoardModel board, int row, int col);
 }
