@@ -26,14 +26,14 @@ public abstract class Move {
 
   /**
    * Apply this move to the given model.
-   * ASSUME the source and target pieces agree.
+   * ASSUME the source and target pieces are present and valid.
    */
   abstract void apply(BoardModel model);
 
 
   /**
    * Undo the effect of last apply to the given model.
-   * ASSUME the source and target pieces agree.
+   * ASSUME the source and target pieces are present and valid.
    */
   abstract void undo(BoardModel model);
 
