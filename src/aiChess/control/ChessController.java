@@ -4,6 +4,7 @@ import aiChess.view.ChessViewListener;
 import aiChess.view.ChessView;
 import aiChess.view.GameOverOption;
 import aiChess.model.ChessGameModel;
+import aiChess.model.PlayerType;
 import aiChess.model.error.InvalidUndoException;
 import aiChess.model.error.InvalidMoveException;
 
@@ -49,8 +50,7 @@ public class ChessController implements ChessViewListener {
 
     while (true) {
       if (!this.model.isGameOver()) { // unlikely but well...
-        while (!this.takeTurn(this.topController) &&
-               !this.takeTurn(this.botController)) {}
+        while (!this.takeTurn(model.getCurrentPlayer()));
       }
       // game is over
       var player = this.model.getCurrentPlayer();
@@ -93,7 +93,8 @@ public class ChessController implements ChessViewListener {
    * ENSURES:  Upon normal exit, this.model.currentPlayer() changes.
    * @return whether the game is over
    */
-  private boolean takeTurn(PlayerController control) {
+  private boolean takeTurn(PlayerType player) {
+    var control = (player == PlayerType.TOP_PLAYER) ? topController : botController;
     // TODO anti-OOD, but the logic is simple enough to be pragmatic for now.
     switch (control) {
       case AI: { 
