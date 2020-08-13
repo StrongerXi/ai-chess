@@ -15,19 +15,106 @@ import java.util.Objects;
  */
 public class ChessController implements ChessViewListener {
 
+  /**
+   * Who is controlling the action of a player.
+   */
+  public static enum PlayerController {
+    USER, AI
+  }
+
   private final ChessGameModel model;
   private final ChessView view;
+  private final PlayerController topController = PlayerController.USER;
+  private final PlayerController botController = PlayerController.USER;
 
+  /**
+   * Constructor.
+   */
   public ChessController(ChessGameModel model, ChessView view) {
     Objects.requireNonNull(model, "model is null\n");
     Objects.requireNonNull(view, "view is null\n");
     this.model = model;
     this.view = view;
-    view.setModel(model);
-    view.setListener(this);
-    this.view.beginInteraction();
   }
 
+  /**
+   * Start running the application.
+   */
+  public void run() {
+    new Thread(() -> {
+      this.view.setModel(model);
+      this.view.setListener(this);
+      this.view.beginInteraction();
+    }).start();
+
+    while (true) {
+      if (!this.model.isGameOver()) { // unlikely but well...
+        while (!this.takeTurn(this.topController) &&
+               !this.takeTurn(this.botController)) {}
+      }
+      // game is over
+      var player = this.model.getCurrentPlayer();
+      var option = this.view.gameOverPrompt(player);
+      // act based on user response
+      switch (option) {
+        case RESTART: {
+          this.view.showMessage("Restarting...\n");
+          this.model.restart();
+          continue;
+        }
+        case QUIT: {
+          this.view.showMessage("Quitting...\n");
+          this.view.stopInteraction();
+          return;
+        }
+      }
+    }
+  }
+
+  // User uses View to select and request a move
+  // But AI player can't. To support an execution model (simplified):
+  // - player1.takeTurn()
+  // - player2.takeTurn()
+  // - repeat
+  // We need to make `takeTurn` a blocking call that potentially depends on
+  // User input from View, which is asynchronous.
+  //
+  // Meanwhile we might want to handle events not related to `takeTurn`, e.g.
+  // save/load game, which just requires a lock to the model.
+  //
+  // The following variables enable asynchronous user action from View to unblock
+  // the `takeTurn` method.
+  private volatile boolean playerActed = false;
+  private final Object lock = new Object();
+
+  /**
+   * Based on given control, take an action.
+   * REQUIRES: this.model.isGameOver == false
+   * ENSURES:  Upon normal exit, this.model.currentPlayer() changes.
+   * @return whether the game is over
+   */
+  private boolean takeTurn(PlayerController control) {
+    // TODO anti-OOD, but the logic is simple enough to be pragmatic for now.
+    switch (control) {
+      case AI: { 
+        // TODO dumb AI relies on human.
+      }
+      case USER: {
+        synchronized (lock) {
+          // wait until one of the *Requested methods signals.
+          while(!this.playerActed) { // prevent spurious wakeup
+            try {
+              lock.wait();
+            } catch (InterruptedException e) {
+              e.printStackTrace();
+            }
+          }
+          this.playerActed = false;
+        }
+      }
+    }
+    return this.model.isGameOver();
+  }
 
   /**
    * Make appropriate response when the user has requested to make a move
@@ -39,25 +126,10 @@ public class ChessController implements ChessViewListener {
    */
   public void moveRequested(int srow, int scol, int trow, int tcol) {
     try {
-      var player = this.model.getCurrentPlayer();
-      this.model.makeMove(srow, scol, trow, tcol);
-      if (this.model.isGameOver()) {
-        this.view.refresh();
-        var option = this.view.gameOverPrompt(player);
-        switch (option) {
-          case RESTART: {
-            this.view.showMessage("Restarting...\n");
-            this.model.restart();
-            return;
-          }
-          case QUIT: {
-            this.view.showMessage("Quitting...\n");
-            this.view.stopInteraction();
-            return;
-          }
-          default:
-            throw new RuntimeException("Unknown game over option: " + option.toString());
-        }
+      synchronized (lock) {
+        this.model.makeMove(srow, scol, trow, tcol);
+        playerActed = true;
+        lock.notify();
       }
     } catch (InvalidMoveException e) {
       this.view.showMessage(e.getMessage());
@@ -70,8 +142,11 @@ public class ChessController implements ChessViewListener {
    */
   public void undoRequested() {
     try {
-      this.model.undoLastMove();
-
+      synchronized (lock) {
+        this.model.undoLastMove();
+        playerActed = true;
+        lock.notify();
+      }
     } catch (InvalidUndoException e) {
       this.view.showMessage(e.getMessage());
     }

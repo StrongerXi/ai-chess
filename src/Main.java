@@ -49,5 +49,6 @@ public class Main {
         throw new IllegalArgumentException("Unsupported view: " + args.view);
     }
     ChessController control = new ChessController(model, view);
+    control.run();
   }
 }

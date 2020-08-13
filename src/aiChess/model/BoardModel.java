@@ -49,6 +49,21 @@ final class BoardModel {
   }
 
   /**
+   * Return a copy of this board.
+   * ENSURES: No side-effect is possible between the original and copy.
+   */
+  BoardModel getCopy() {
+    // since Piece is immutable, we just do a shallow copy
+    var copy = new BoardModel(this.height, this.width);
+    for (int row = 0; row < height; row += 1) {
+      for (int col = 0; col < width; col += 1) {
+        copy.board[row][col] = this.board[row][col];
+      }
+    }
+    return copy;
+  }
+
+  /**
    * Retrive the Piece at given row and column on this board.
    * @throws InvalidPositionException if (row, col) is out of bound.
    * @return Optional.empty() if no piece is at position (row, ccol)
