@@ -4,11 +4,16 @@ import aiChess.view.ChessViewListener;
 import aiChess.view.ChessView;
 import aiChess.view.GameOverOption;
 import aiChess.model.ChessGameModel;
+import aiChess.model.MoveFinder;
+import aiChess.model.MoveFinderFactory;
 import aiChess.model.PlayerType;
+import aiChess.model.MoveFinderFactory.MoveFinderType;
 import aiChess.model.error.InvalidUndoException;
 import aiChess.model.error.InvalidMoveException;
 
 import java.util.Objects;
+import java.util.Map;
+import java.util.HashMap;
 
 
 /**
@@ -25,8 +30,10 @@ public class ChessController implements ChessViewListener {
 
   private final ChessGameModel model;
   private final ChessView view;
-  private final PlayerController topController = PlayerController.USER;
-  private final PlayerController botController = PlayerController.USER;
+  // only makes sense if corresponding controller is AI
+  private final Map<PlayerType, MoveFinder> moveFinderMap = new HashMap<>();
+  private final Map<PlayerType, PlayerController> controllerMap = new HashMap<>();
+
 
   /**
    * Constructor.
@@ -36,6 +43,11 @@ public class ChessController implements ChessViewListener {
     Objects.requireNonNull(view, "view is null\n");
     this.model = model;
     this.view = view;
+    var defaultFinder = MoveFinderFactory.makeMoveFinder(MoveFinderType.MINIMAX, 3);
+    this.moveFinderMap.put(PlayerType.TOP_PLAYER, defaultFinder);
+    this.moveFinderMap.put(PlayerType.BOTTOM_PLAYER, defaultFinder);
+    this.controllerMap.put(PlayerType.TOP_PLAYER, PlayerController.AI);
+    this.controllerMap.put(PlayerType.BOTTOM_PLAYER, PlayerController.USER);
   }
 
   /**
@@ -71,6 +83,22 @@ public class ChessController implements ChessViewListener {
     }
   }
 
+  /**
+   * Set controller for `player` to AI, with given type of MoveFinder and search depth.
+   */
+  public void setAIController(PlayerType player, MoveFinderType type, int depth) {
+    var finder = MoveFinderFactory.makeMoveFinder(MoveFinderType.MINIMAX, 3);
+    this.controllerMap.put(player, PlayerController.AI);
+    this.moveFinderMap.put(player, finder);
+  }
+
+  /**
+   * Set controller for `player` to human user which makes move via View UI.
+   */
+  public void setUserController(PlayerType player) {
+    this.controllerMap.put(player, PlayerController.USER);
+  }
+
   // User uses View to select and request a move
   // But AI player can't. To support an execution model (simplified):
   // - player1.takeTurn()
@@ -88,17 +116,23 @@ public class ChessController implements ChessViewListener {
   private final Object lock = new Object();
 
   /**
-   * Based on given control, take an action.
+   * Let given player take an action.
    * REQUIRES: this.model.isGameOver == false
    * ENSURES:  Upon normal exit, this.model.currentPlayer() changes.
    * @return whether the game is over
    */
   private boolean takeTurn(PlayerType player) {
-    var control = (player == PlayerType.TOP_PLAYER) ? topController : botController;
+    var control = this.controllerMap.get(player);
     // TODO anti-OOD, but the logic is simple enough to be pragmatic for now.
     switch (control) {
       case AI: { 
-        // TODO dumb AI relies on human.
+        var finder = this.moveFinderMap.get(player);
+        var move = finder.getBestMove(this.model);
+        var src = move.sourcePos;
+        var dst = move.targetPos;
+        this.model.makeMove(src.row, src.col, dst.row, dst.col);
+        this.view.refresh(); // this move bypassed view, manually sync it.
+        break;
       }
       case USER: {
         synchronized (lock) {
