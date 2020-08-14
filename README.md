@@ -72,6 +72,8 @@ __General Ideas__:
 - [efficient legal move generation](https://peterellisjones.com/posts/generating-legal-chess-moves-efficiently/)
 - [Move Generation Validation with Perft Score](http://mediocrechess.blogspot.com/2007/01/guide-perft-scores.html)
 - [Search Algorithms](http://www.frayn.net/beowulf/theory.html)
+- [Search Algorithm
+  illustrated](https://www.freecodecamp.org/news/simple-chess-ai-step-by-step-1d55a9266977/)
 
 __Code references__:
 - [python-chess](https://github.com/niklasf/python-chess/blob/035e32b061430b36752bd994f36a86e4df25886d/chess/__init__.py)
