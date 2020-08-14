@@ -43,7 +43,7 @@ public class ChessController implements ChessViewListener {
     Objects.requireNonNull(view, "view is null\n");
     this.model = model;
     this.view = view;
-    var defaultFinder = MoveFinderFactory.makeMoveFinder(MoveFinderType.MINIMAX, 3);
+    var defaultFinder = MoveFinderFactory.makeMoveFinder(MoveFinderType.MINIMAX, 4);
     this.moveFinderMap.put(PlayerType.TOP_PLAYER, defaultFinder);
     this.moveFinderMap.put(PlayerType.BOTTOM_PLAYER, defaultFinder);
     this.controllerMap.put(PlayerType.TOP_PLAYER, PlayerController.AI);
@@ -178,7 +178,17 @@ public class ChessController implements ChessViewListener {
   public void undoRequested() {
     try {
       synchronized (lock) {
-        this.model.undoLastMove();
+        var player = this.model.getCurrentPlayer();
+        var opponent = (player == PlayerType.TOP_PLAYER) ?
+                        PlayerType.BOTTOM_PLAYER : PlayerType.TOP_PLAYER;
+        // Since AI algorithms are currently (and likely in future) deterministic,
+        // we don't support undo when both players are controlled by computers
+        if (this.controllerMap.get(opponent) == PlayerController.USER) {
+          this.model.undoLastMove(); // undo player move
+        } else if (this.controllerMap.get(player) == PlayerController.USER) {
+          this.model.undoLastMove(); // undo computer move
+          this.model.undoLastMove(); // undo player move
+        }
         playerActed = true;
         lock.notify();
       }
