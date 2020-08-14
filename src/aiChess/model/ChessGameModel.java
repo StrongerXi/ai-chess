@@ -85,6 +85,15 @@ public final class ChessGameModel {
 
 
   /**
+   * Return a copy of the current board.
+   * Mutating the copy has no effect on the original board.
+   */
+  BoardModel getBoardCopy() {
+    return this.board.getCopy();
+  }
+
+
+  /**
    * Return the width of the board in unit of Piece.
    */
   public int getWidth() {

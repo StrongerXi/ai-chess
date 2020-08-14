@@ -190,4 +190,40 @@ final class BoardModel {
   public int hashCode() {
     return board.hashCode();
   }
+
+  /**
+   * Convert the board to debug string format.
+   */
+  String debugString() {
+    var sb = new StringBuilder();
+    for (int row = this.height - 1; row >= 0; row -= 1) {
+      for (var piece : this.board[row]) {
+        var ch = (piece == null) ? 'x' : pieceToChar(piece);
+        sb.append(ch);
+        sb.append(' ');
+      }
+      sb.append('\n');
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Convert a piece to character representation.
+   */
+  static private char pieceToChar(Piece p) {
+    var ch = '?';
+    switch (p.type) {
+      case PAWN:   ch = 'p'; break;
+      case KNIGHT: ch = 'n'; break;
+      case BISHOP: ch = 'b'; break;
+      case CASTLE: ch = 'c'; break;
+      case QUEEN:  ch = 'q'; break;
+      case KING:   ch = 'k'; break;
+      default:     ch = '?'; break;
+    }
+    if (p.owner == PlayerType.TOP_PLAYER) {
+      ch = Character.toUpperCase(ch);
+    }
+    return ch;
+  }
 }
