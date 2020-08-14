@@ -124,18 +124,18 @@ public class ChessController implements ChessViewListener {
   private boolean takeTurn(PlayerType player) {
     var control = this.controllerMap.get(player);
     // TODO anti-OOD, but the logic is simple enough to be pragmatic for now.
-    switch (control) {
-      case AI: { 
-        var finder = this.moveFinderMap.get(player);
-        var move = finder.getBestMove(this.model);
-        var src = move.sourcePos;
-        var dst = move.targetPos;
-        this.model.makeMove(src.row, src.col, dst.row, dst.col);
-        this.view.refresh(); // this move bypassed view, manually sync it.
-        break;
-      }
-      case USER: {
-        synchronized (lock) {
+    synchronized (lock) {
+      switch (control) {
+        case AI: {
+          var finder = this.moveFinderMap.get(player);
+          var move = finder.getBestMove(this.model);
+          var src = move.sourcePos;
+          var dst = move.targetPos;
+          this.model.makeMove(src.row, src.col, dst.row, dst.col);
+          this.view.refresh(); // this move bypassed view, manually sync it.
+          break;
+        }
+        case USER: {
           // wait until one of the *Requested methods signals.
           while(!this.playerActed) { // prevent spurious wakeup
             try {
