@@ -43,7 +43,7 @@ public class ChessController implements ChessViewListener {
     Objects.requireNonNull(view, "view is null\n");
     this.model = model;
     this.view = view;
-    var defaultFinder = MoveFinderFactory.makeMoveFinder(MoveFinderType.MINIMAX, 4);
+    var defaultFinder = MoveFinderFactory.makeMoveFinder(MoveFinderType.ALPHA_BETA, 5);
     this.moveFinderMap.put(PlayerType.TOP_PLAYER, defaultFinder);
     this.moveFinderMap.put(PlayerType.BOTTOM_PLAYER, defaultFinder);
     this.controllerMap.put(PlayerType.TOP_PLAYER, PlayerController.AI);
