@@ -1,5 +1,6 @@
 package aiChess.model;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
@@ -176,19 +177,13 @@ final class BoardModel {
     if (o == this) return true;
 
     BoardModel other = (BoardModel) o;
-    /* compare each piece */
-    for (int r = 0; r < height; r += 1) {
-      for (int c = 0; c < width; c += 1) {
-        if (!this.board[r][c].equals(other.board[r][c])) return false;
-      }
-    }
-    return true;
+    return Arrays.deepEquals(this.board, other.board);
   }
 
 
   @Override
   public int hashCode() {
-    return board.hashCode();
+    return Arrays.deepHashCode(this.board);
   }
 
   /**

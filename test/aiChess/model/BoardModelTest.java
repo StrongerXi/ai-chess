@@ -11,6 +11,50 @@ import java.util.HashSet;
 public class BoardModelTest {
 
   @Test
+  public void testEquality() {
+    // 1 _ _ B
+    // 0 _ c _
+    //   0 1 2
+    var bishop = Optional.of(PieceFactory.makePiece(PieceType.BISHOP, PlayerType.TOP_PLAYER));
+    var castle = Optional.of(PieceFactory.makePiece(PieceType.CASTLE, PlayerType.BOTTOM_PLAYER));
+    var board = new BoardModel(2, 3);
+    board.setPieceAt(0, 1, castle);
+    board.setPieceAt(1, 2, bishop);
+
+    var bishopDup = Optional.of(PieceFactory.makePiece(PieceType.BISHOP, PlayerType.TOP_PLAYER));
+    var castleDup = Optional.of(PieceFactory.makePiece(PieceType.CASTLE, PlayerType.BOTTOM_PLAYER));
+    var boardDup = new BoardModel(2, 3);
+    boardDup.setPieceAt(0, 1, castleDup);
+    boardDup.setPieceAt(1, 2, bishopDup);
+
+    assertEquals("Same board constructed separated", board, boardDup);
+    assertEquals("Board copy equals", board.getCopy(), board);
+    assertEquals("Board copy reference equality", false, board.getCopy() == board);
+  }
+
+  @Test
+  public void testHashCode() {
+    // 2 _ _ _
+    // 1 _ _ B
+    // 0 _ c _
+    //   0 1 2
+    var bishop = Optional.of(PieceFactory.makePiece(PieceType.BISHOP, PlayerType.TOP_PLAYER));
+    var castle = Optional.of(PieceFactory.makePiece(PieceType.CASTLE, PlayerType.BOTTOM_PLAYER));
+    var board = new BoardModel(3, 3);
+    board.setPieceAt(0, 1, castle);
+    board.setPieceAt(1, 2, bishop);
+
+    var bishopDup = Optional.of(PieceFactory.makePiece(PieceType.BISHOP, PlayerType.TOP_PLAYER));
+    var castleDup = Optional.of(PieceFactory.makePiece(PieceType.CASTLE, PlayerType.BOTTOM_PLAYER));
+    var boardDup = new BoardModel(3, 3);
+    boardDup.setPieceAt(0, 1, castleDup);
+    boardDup.setPieceAt(1, 2, bishopDup);
+
+    assertEquals("Same board constructed separated", board.hashCode(), boardDup.hashCode());
+    assertEquals("Board copy equals", board.getCopy().hashCode(), board.hashCode());
+  }
+
+  @Test
   public void testGetSetPiece() {
     // 1 _ _ B
     // 0 _ c _
