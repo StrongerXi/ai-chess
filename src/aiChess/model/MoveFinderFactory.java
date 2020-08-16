@@ -106,6 +106,8 @@ public final class MoveFinderFactory {
     private final int initialDepth;
     private final PlayerType player; // evaluate for this player specifically
     private final TranspositionTable cache = new TranspositionTable();
+    private int cacheHits;
+    private int explored;
     /**
      * Constructor.
      */
@@ -125,6 +127,9 @@ public final class MoveFinderFactory {
       var bestScore = Integer.MIN_VALUE;
       var opponent = flipPlayer(player);
 
+      this.cacheHits = 0;
+      this.explored = 0;
+      var start = System.nanoTime(); // profiling
       // do 1 step expansion here, since `alphabeta` returns score only.
       for (var move : legalMoves) {
         move.apply(board);
@@ -137,7 +142,11 @@ public final class MoveFinderFactory {
         }
         move.undo(board);
       }
-      this.cache.clear();
+      this.cache.clear(); // most entries won't be re-usable
+      var end = System.nanoTime();
+      System.out.printf("Took %.3fs, explored %d nodes, cache hits = %d\n",
+          (end - start) / 1e9, explored, cacheHits);
+
       return bestMove;
     }
 
@@ -154,6 +163,7 @@ public final class MoveFinderFactory {
      * @param currentPlayer  is the player to make next move.
      */
     private int alphabeta(BoardModel board, int remainDepth, int lower, int upper, PlayerType currentPlayer) {
+      this.explored += 1;
       if (remainDepth == 0) {
         return evaluateBoard(board, this.player);
       } 
@@ -168,6 +178,7 @@ public final class MoveFinderFactory {
       // check cache
       var entryOpt = this.cache.get(board, currentPlayer);
       if (entryOpt.isPresent() && entryOpt.get().depth >= remainDepth) {
+        cacheHits += 1;
         var entry = entryOpt.get();
         switch (entry.type) {
           case EXACT: return entry.score;
