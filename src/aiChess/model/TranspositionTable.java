@@ -74,7 +74,7 @@ class TranspositionTable {
   Optional<Entry> get(BoardModel board, PlayerType player) {
     var key = new Key(board, player);
     var val = this.cache.getOrDefault(key, null);
-    return Optional.ofNullable(null);
+    return Optional.ofNullable(val);
   }
 
   int size() {
