@@ -43,9 +43,12 @@ public class ChessController implements ChessViewListener {
     Objects.requireNonNull(view, "view is null\n");
     this.model = model;
     this.view = view;
-    var defaultFinder = MoveFinderFactory.makeMoveFinder(MoveFinderType.ALPHA_BETA, 5);
-    this.moveFinderMap.put(PlayerType.TOP_PLAYER, defaultFinder);
-    this.moveFinderMap.put(PlayerType.BOTTOM_PLAYER, defaultFinder);
+    // default finders
+    var topFinder = MoveFinderFactory.makeMoveFinder(MoveFinderType.ALPHA_BETA, 6, PlayerType.TOP_PLAYER);
+    var botFinder = MoveFinderFactory.makeMoveFinder(MoveFinderType.ALPHA_BETA, 5, PlayerType.BOTTOM_PLAYER);
+    this.moveFinderMap.put(PlayerType.TOP_PLAYER, topFinder);
+    this.moveFinderMap.put(PlayerType.BOTTOM_PLAYER, botFinder);
+    // default user vs computer
     this.controllerMap.put(PlayerType.TOP_PLAYER, PlayerController.AI);
     this.controllerMap.put(PlayerType.BOTTOM_PLAYER, PlayerController.USER);
   }
@@ -87,7 +90,7 @@ public class ChessController implements ChessViewListener {
    * Set controller for `player` to AI, with given type of MoveFinder and search depth.
    */
   public void setAIController(PlayerType player, MoveFinderType type, int depth) {
-    var finder = MoveFinderFactory.makeMoveFinder(MoveFinderType.MINIMAX, 3);
+    var finder = MoveFinderFactory.makeMoveFinder(MoveFinderType.MINIMAX, 3, player);
     this.controllerMap.put(player, PlayerController.AI);
     this.moveFinderMap.put(player, finder);
   }
