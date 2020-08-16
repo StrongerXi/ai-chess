@@ -53,10 +53,6 @@ class TranspositionTable {
   }
 
   private final Map<Key, Entry> cache = new HashMap<>();
-  TranspositionTable() {}
-
-  // TODO debug
-  Map<PlayerType, Set<BoardModel>> explored = new HashMap<>();
 
   // `board` must be immutable, (use getCopy method if necessary)
   void put(BoardModel board, PlayerType player, int score, int depth, EntryType type) {
@@ -65,8 +61,6 @@ class TranspositionTable {
     var dup = this.cache.getOrDefault(key, null);
     // deeper means more accurate in general
     if (dup == null || depth > dup.depth) {
-      var set = explored.computeIfAbsent(player, p -> new HashSet<>());
-      set.add(board);
       this.cache.put(key, val);
     }
   }
