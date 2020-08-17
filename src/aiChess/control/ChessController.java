@@ -44,7 +44,7 @@ public class ChessController implements ChessViewListener {
     this.model = model;
     this.view = view;
     // default finders
-    var topFinder = MoveFinderFactory.makeMoveFinder(MoveFinderType.ALPHA_BETA, 5, PlayerType.TOP_PLAYER);
+    var topFinder = MoveFinderFactory.makeMoveFinder(MoveFinderType.ALPHA_BETA, 4, PlayerType.TOP_PLAYER);
     var botFinder = MoveFinderFactory.makeMoveFinder(MoveFinderType.ALPHA_BETA, 5, PlayerType.BOTTOM_PLAYER);
     this.moveFinderMap.put(PlayerType.TOP_PLAYER, topFinder);
     this.moveFinderMap.put(PlayerType.BOTTOM_PLAYER, botFinder);
