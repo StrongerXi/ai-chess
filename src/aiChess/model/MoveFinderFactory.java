@@ -2,6 +2,8 @@ package aiChess.model;
 
 import aiChess.model.TranspositionTable.EntryType;
 import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * A factory to generate different types of MoveFinder.
@@ -111,7 +113,8 @@ public final class MoveFinderFactory {
     private final int initialDepth;
     private final PlayerType player; // evaluate for this player specifically
     private final TranspositionTable cache = new TranspositionTable();
-    private int cacheHits;
+    // maps remainDepth to cache hits
+    private Map<Integer, Integer> cacheHits = new TreeMap<>();
     private int explored;
     /**
      * Constructor.
@@ -132,7 +135,7 @@ public final class MoveFinderFactory {
       var bestScore = Integer.MIN_VALUE;
       var opponent = flipPlayer(player);
 
-      this.cacheHits = 0;
+      this.cacheHits.clear();
       this.explored = 0;
       var start = System.nanoTime(); // profiling
       // do 1 step expansion here, since `alphabeta` returns score only.
@@ -149,8 +152,12 @@ public final class MoveFinderFactory {
       }
       this.cache.clear(); // most entries won't be re-usable
       var end = System.nanoTime();
-      System.out.printf("Took %.3fs, explored %d nodes, cache hits = %d\n",
-          (end - start) / 1e9, explored, cacheHits);
+      System.out.printf("Took %.3fs, explored %d nodes\n", (end - start) / 1e9, explored);
+      for (var entry : this.cacheHits.entrySet()) {
+        var depth = entry.getKey();
+        var hits  = entry.getValue();
+        System.out.printf("At depth %d, cache hits = %d\n", depth, hits);
+      }
 
       return bestMove;
     }
@@ -171,17 +178,10 @@ public final class MoveFinderFactory {
       this.explored += 1;
       boolean maximizer = (currentPlayer == this.player);
       var score = maximizer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-      var legalMoves = board.getAllLegalMoves(currentPlayer);
-      if (legalMoves.isEmpty()) { // checkmate
-        return score;
-      }
-      if (remainDepth == 0) {
-        return evaluateBoard(board, this.player, legalMoves);
-      }
       // check cache
       var entryOpt = this.cache.get(board, currentPlayer);
       if (entryOpt.isPresent() && entryOpt.get().depth >= remainDepth) {
-        cacheHits += 1;
+        cacheHits.merge(remainDepth, 1, Integer::sum);
         var entry = entryOpt.get();
         switch (entry.type) {
           case EXACT: return entry.score;
@@ -194,6 +194,15 @@ public final class MoveFinderFactory {
         if (lower >= upper) {
           return entry.score;
         }
+      }
+      var legalMoves = board.getAllLegalMoves(currentPlayer);
+      if (legalMoves.isEmpty()) { // checkmate
+        return score;
+      }
+      if (remainDepth == 0) {
+        score = evaluateBoard(board, this.player, legalMoves);
+        this.cache.put(board.getCopy(), currentPlayer, score, 0, EntryType.EXACT);
+        return score;
       }
 
       var nextPlayer = flipPlayer(currentPlayer);
