@@ -153,16 +153,15 @@ final class BoardModel {
                    PlayerType.BOTTOM_PLAYER : PlayerType.TOP_PLAYER;
     // no opponent piece should threaten king after the move
     move.apply(this);
-    for (int row = 0; row < this.height; row += 1) {
-      for (int col = 0; col < this.width; col += 1) {
-        var piece = this.board[row][col];
-        if (piece != null &&
-            piece.owner == opponent &&
-            piece.getAllMovesFrom(this, row, col).stream()
-            .anyMatch(m -> m.targetPos.equals(fKingPos))) {
-          move.undo(this);
-          return false;
-        }
+    for (var pos : opponentPositions) {
+      int row = pos.row, col = pos.col;
+      var piece = this.board[row][col];
+      if (piece != null &&
+          piece.owner == opponent &&
+          piece.getAllMovesFrom(this, row, col).stream()
+          .anyMatch(m -> m.targetPos.equals(fKingPos))) {
+        move.undo(this);
+        return false;
       }
     }
     move.undo(this);
