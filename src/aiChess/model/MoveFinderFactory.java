@@ -1,6 +1,9 @@
 package aiChess.model;
 
 import aiChess.model.TranspositionTable.EntryType;
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * A factory to generate different types of MoveFinder.
@@ -81,12 +84,17 @@ public final class MoveFinderFactory {
      * @param currentPlayer  is the player to make next move.
      */
     private int minimax(BoardModel board, int remainDepth, PlayerType currentPlayer) {
-      if (remainDepth == 0) {
-        return evaluateBoard(board, this.player);
-      }
       boolean maximizer = (currentPlayer == this.player);
-      var nextPlayer = flipPlayer(currentPlayer);
       var score = maximizer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+      var legalMoves = board.getAllLegalMoves(currentPlayer);
+      var nextPlayer = flipPlayer(currentPlayer);
+      if (legalMoves.isEmpty()) { // checkmate
+        return score;
+      }
+      if (remainDepth == 0) {
+        legalMoves.addAll(board.getAllLegalMoves(nextPlayer));
+        return evaluateBoard(board, this.player, legalMoves);
+      }
       for (var move : board.getAllLegalMoves(currentPlayer)) {
         move.apply(board);
         var newScore = this.minimax(board, remainDepth - 1, nextPlayer);
@@ -106,7 +114,8 @@ public final class MoveFinderFactory {
     private final int initialDepth;
     private final PlayerType player; // evaluate for this player specifically
     private final TranspositionTable cache = new TranspositionTable();
-    private int cacheHits;
+    // maps remainDepth to cache hits
+    private Map<Integer, Integer> cacheHits = new TreeMap<>();
     private int explored;
     /**
      * Constructor.
@@ -127,7 +136,7 @@ public final class MoveFinderFactory {
       var bestScore = Integer.MIN_VALUE;
       var opponent = flipPlayer(player);
 
-      this.cacheHits = 0;
+      this.cacheHits.clear();
       this.explored = 0;
       var start = System.nanoTime(); // profiling
       // do 1 step expansion here, since `alphabeta` returns score only.
@@ -144,8 +153,12 @@ public final class MoveFinderFactory {
       }
       this.cache.clear(); // most entries won't be re-usable
       var end = System.nanoTime();
-      System.out.printf("Took %.3fs, explored %d nodes, cache hits = %d\n",
-          (end - start) / 1e9, explored, cacheHits);
+      System.out.printf("Took %.3fs, explored %d nodes\n", (end - start) / 1e9, explored);
+      for (var entry : this.cacheHits.entrySet()) {
+        var depth = entry.getKey();
+        var hits  = entry.getValue();
+        System.out.printf("At depth %d, cache hits = %d\n", depth, hits);
+      }
 
       return bestMove;
     }
@@ -164,21 +177,12 @@ public final class MoveFinderFactory {
      */
     private int alphabeta(BoardModel board, int remainDepth, int lower, int upper, PlayerType currentPlayer) {
       this.explored += 1;
-      if (remainDepth == 0) {
-        return evaluateBoard(board, this.player);
-      } 
-
       boolean maximizer = (currentPlayer == this.player);
       var score = maximizer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-      var legalMoves = board.getAllLegalMoves(currentPlayer);
-      if (legalMoves.isEmpty()) { // checkmate
-        return score;
-      }
-
       // check cache
       var entryOpt = this.cache.get(board, currentPlayer);
       if (entryOpt.isPresent() && entryOpt.get().depth >= remainDepth) {
-        cacheHits += 1;
+        cacheHits.merge(remainDepth, 1, Integer::sum);
         var entry = entryOpt.get();
         switch (entry.type) {
           case EXACT: return entry.score;
@@ -192,8 +196,17 @@ public final class MoveFinderFactory {
           return entry.score;
         }
       }
-
+      var legalMoves = board.getAllLegalMoves(currentPlayer);
       var nextPlayer = flipPlayer(currentPlayer);
+      if (legalMoves.isEmpty()) { // checkmate
+        return score;
+      }
+      if (remainDepth == 0) {
+        legalMoves.addAll(board.getAllLegalMoves(nextPlayer));
+        score = evaluateBoard(board, this.player, legalMoves);
+        this.cache.put(board.getCopy(), currentPlayer, score, 0, EntryType.EXACT);
+        return score;
+      }
       // maximizer keeps pushing up lower bound, and opposite for minimizer.
       for (var move : legalMoves) {
         move.apply(board);
@@ -226,33 +239,80 @@ public final class MoveFinderFactory {
     }
   }
 
+  static private int pieceMaterialScore(PieceType type) {
+    switch(type) {
+      case PAWN:   return 10;
+      case KNIGHT: return 30;
+      case BISHOP: return 30;
+      case CASTLE: return 50;
+      case QUEEN:  return 90;
+      case KING:   return 900;
+      default:
+        throw new RuntimeException("Unsupported piece type: " + type.toString());
+    }
+  }
+
   /**
    * Evaluate the state of `board` for `player`.
    * Higher score means better chance of winning.
+   * @param legalMoves are the legal moves for the both players.
    */
-  static private int evaluateBoard(BoardModel board, PlayerType player) {
-    int score = 0;
+  static private int evaluateBoard(BoardModel board, PlayerType player, Collection<Move> legalMoves) {
+    int materialScore = 0;
+    int forwardOffset = (player == PlayerType.TOP_PLAYER) ? -1 : 1;
+    int startRow      = (player == PlayerType.TOP_PLAYER) ? board.height-1 : 0;
+    // material and position related scores
     for (int row = 0; row < board.height; row += 1) {
       for (int col = 0; col < board.width; col += 1) {
-        var piece = board.getPieceAt(row, col);
-        if (piece.isEmpty()) {
+        var pieceOpt = board.getPieceAt(row, col);
+        if (pieceOpt.isEmpty()) {
           continue;
         }
-        var pieceScore = 0;
-        switch(piece.get().type) {
-          case PAWN:   pieceScore = 10;  break;
-          case KNIGHT: pieceScore = 30;  break;
-          case BISHOP: pieceScore = 30;  break;
-          case CASTLE: pieceScore = 50;  break;
-          case QUEEN:  pieceScore = 90;  break;
-          case KING:   pieceScore = 900; break;
+        var piece = pieceOpt.get();
+        var pieceScore = pieceMaterialScore(piece.type);
+        if (piece.type == PieceType.PAWN) {
+          // closer to border -> higher chance of promotion
+          pieceScore += Math.abs(row - startRow);
+          var forwardRow = row + forwardOffset;
+          if (forwardRow < 0 || forwardRow >= board.height) {
+            continue;
+          }
+          var forwardPieceOpt = board.getPieceAt(forwardRow, col);
+          if (forwardPieceOpt.isPresent()) { // blocked pawn
+            pieceScore += 5;
+            var forwardPiece = forwardPieceOpt.get();
+            if (forwardPiece.type == PieceType.PAWN &&
+                forwardPiece.owner == piece.owner) { // doubled pawn
+              pieceScore += 5;
+            }
+          }
         }
-        if (player != piece.get().owner) {
+        if (player != piece.owner) {
           pieceScore *= -1;
         }
-        score += pieceScore;
+        materialScore += pieceScore;
       }
     }
-    return score;
+    // move related scores
+    var moveScore = 0;
+    for (var move : legalMoves) {
+      var srcPos = move.sourcePos;
+      var source = board.getPieceAt(srcPos.row, srcPos.col).get();
+      var dstPos = move.targetPos;
+      var targetOpt = board.getPieceAt(dstPos.row, dstPos.col);
+      var score = 1; // mobility bonus
+      if (targetOpt.isPresent()) {
+        // protect or attack
+        var target = targetOpt.get();
+        // not exactly the same as actually attacked/protected
+        var pieceScore = pieceMaterialScore(target.type) / 2;
+        score += pieceScore;
+      }
+      if (source.owner != player) {
+        score *= -1;
+      }
+      moveScore += score;
+    }
+    return materialScore + moveScore;
   }
 }

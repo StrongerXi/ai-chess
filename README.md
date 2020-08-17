@@ -22,6 +22,7 @@ __General Ideas__:
   illustrated](https://www.freecodecamp.org/news/simple-chess-ai-step-by-step-1d55a9266977/)
 - [alphabeta and transposition](https://en.wikipedia.org/wiki/Negamax#cite_note-Breuker-1)
 - [mtdf algorithm](http://people.csail.mit.edu/plaat/mtdf.html#abmem)
+- [heuristisc](https://www.cs.cornell.edu/boom/2004sp/ProjectArch/Chess/algorithms.html)
 
 __Code references__:
 - [python-chess](https://github.com/niklasf/python-chess/blob/035e32b061430b36752bd994f36a86e4df25886d/chess/__init__.py)
