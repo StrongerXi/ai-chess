@@ -1,6 +1,7 @@
 package aiChess.model;
 
 import aiChess.model.TranspositionTable.EntryType;
+import java.util.Collection;
 
 /**
  * A factory to generate different types of MoveFinder.
@@ -81,12 +82,16 @@ public final class MoveFinderFactory {
      * @param currentPlayer  is the player to make next move.
      */
     private int minimax(BoardModel board, int remainDepth, PlayerType currentPlayer) {
-      if (remainDepth == 0) {
-        return evaluateBoard(board, this.player);
-      }
       boolean maximizer = (currentPlayer == this.player);
-      var nextPlayer = flipPlayer(currentPlayer);
       var score = maximizer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+      var legalMoves = board.getAllLegalMoves(currentPlayer);
+      if (legalMoves.isEmpty()) { // checkmate
+        return score;
+      }
+      if (remainDepth == 0) {
+        return evaluateBoard(board, this.player, legalMoves);
+      }
+      var nextPlayer = flipPlayer(currentPlayer);
       for (var move : board.getAllLegalMoves(currentPlayer)) {
         move.apply(board);
         var newScore = this.minimax(board, remainDepth - 1, nextPlayer);
@@ -164,17 +169,15 @@ public final class MoveFinderFactory {
      */
     private int alphabeta(BoardModel board, int remainDepth, int lower, int upper, PlayerType currentPlayer) {
       this.explored += 1;
-      if (remainDepth == 0) {
-        return evaluateBoard(board, this.player);
-      } 
-
       boolean maximizer = (currentPlayer == this.player);
       var score = maximizer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
       var legalMoves = board.getAllLegalMoves(currentPlayer);
       if (legalMoves.isEmpty()) { // checkmate
         return score;
       }
-
+      if (remainDepth == 0) {
+        return evaluateBoard(board, this.player, legalMoves);
+      }
       // check cache
       var entryOpt = this.cache.get(board, currentPlayer);
       if (entryOpt.isPresent() && entryOpt.get().depth >= remainDepth) {
@@ -230,7 +233,7 @@ public final class MoveFinderFactory {
    * Evaluate the state of `board` for `player`.
    * Higher score means better chance of winning.
    */
-  static private int evaluateBoard(BoardModel board, PlayerType player) {
+  static private int evaluateBoard(BoardModel board, PlayerType player, Collection<Move> legalMoves) {
     int score = 0;
     for (int row = 0; row < board.height; row += 1) {
       for (int col = 0; col < board.width; col += 1) {
@@ -253,6 +256,7 @@ public final class MoveFinderFactory {
         score += pieceScore;
       }
     }
+    score += legalMoves.size();
     return score;
   }
 }
