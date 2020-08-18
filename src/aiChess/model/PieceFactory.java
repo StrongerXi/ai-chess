@@ -52,9 +52,92 @@ final class PieceFactory {
     }
     public Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
       Collection<Move> moves = new ArrayList<>();
-      addCrossMoves(model, owner, new Position(row, col), 1, moves);
-      addDiagonalMoves(model, owner, new Position(row, col), 1, moves);
+      var kingPos = new Position(row, col);
+      addCrossMoves(model, owner, kingPos, 1, moves);
+      addDiagonalMoves(model, owner, kingPos, 1, moves);
+      tryAddCastlingMoves(model, row, col, moves);
       return moves;
+    }
+
+    /**
+     * Try add castling moves to `moves`.
+     * ASSUME (row, col) contains a King on `board.`
+     */
+    private void tryAddCastlingMoves(BoardModel board, int row, int col, Collection<Move> moves) {
+      // castling, 3 rules
+      // - king and castle not moved
+      // - in between pieces empty and not under attack
+      // - king not in check (i.e. under attack)
+      var king = board.getPieceAt(row, col).get();
+      var kingPos = new Position(row, col);
+      if (king.hasMoved) {
+        return;
+      }
+      // try both castles
+      for (int colDelta = -1; colDelta <= 1; colDelta += 2) {
+        var castleCol = col + colDelta;
+        if (castleCol < 0 || castleCol >= board.width) {
+          continue;
+        }
+        // find the first non-empty piece, candidate for castling
+        while (1 <= castleCol && castleCol < board.width - 1 &&
+               board.getPieceAt(row, castleCol).isEmpty()) {
+          castleCol += colDelta;
+        }
+        Optional<Piece> pieceOpt;
+        Piece piece;
+        if (castleCol != col + colDelta && // needs at least 1 space btw king/castle
+            (pieceOpt = board.getPieceAt(row, castleCol)).isPresent() &&
+            (piece = pieceOpt.get()).owner == king.owner && piece.type == PieceType.CASTLE && !piece.hasMoved) {
+          // both king and target castle haven't moved
+          boolean allEmpty = true;
+          var safePos = new ArrayList<Position>();
+          for (int i = 1; i < Math.abs(castleCol - col); i += 1) {
+            pieceOpt = board.getPieceAt(row, col + i * colDelta);
+            if (pieceOpt.isPresent()) {
+              allEmpty = false;
+              break;
+            }
+            safePos.add(new Position(row, col + i * colDelta));
+          }
+          // make sure king and those empty positions are not under attack
+          safePos.add(kingPos);
+          var opponent = (this.owner == PlayerType.TOP_PLAYER) ?
+                          PlayerType.BOTTOM_PLAYER : PlayerType.TOP_PLAYER;
+          if (allEmpty && anyUnderAttack(safePos, board, opponent)) {
+            moves.add(MoveFactory.makeCastling(kingPos, new Position(row, castleCol - colDelta)));
+          }
+        }
+      }
+    }
+
+    /**
+     * Return whether any of the given positions attacked by `player` in `board`.
+     * **NOTE** It won't consider castling mvoes for `player`.
+     */
+    static private boolean anyUnderAttack(Collection<Position> positions, BoardModel board, PlayerType player) {
+      for (int row = 0; row < board.height; row += 1) {
+        for (int col = 0; col < board.width; col += 1) {
+          Optional<Piece> pieceOpt;
+          Piece piece;
+          if ((pieceOpt = board.getPieceAt(row, col)).isEmpty() ||
+              (piece = pieceOpt.get()).owner != player) {
+            continue;
+          }
+          Collection<Move> moves = new ArrayList<>();
+          if (piece.type != PieceType.KING) {
+            moves = piece.getAllMovesFrom(board, row, col);
+          } else if (piece.type == PieceType.KING) {
+            addCrossMoves(board, piece.owner, new Position(row, col), 1, moves);
+            addDiagonalMoves(board, piece.owner, new Position(row, col), 1, moves);
+          }
+          if (moves.stream().anyMatch(m -> positions.contains(m.targetPos))) {
+            // some move from (row, col) attacks a position in `positions`
+            return false;
+          }
+        }
+      }
+      return true;
     }
   }
 

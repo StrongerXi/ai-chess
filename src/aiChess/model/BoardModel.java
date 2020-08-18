@@ -185,6 +185,11 @@ final class BoardModel {
     return Arrays.deepHashCode(this.board);
   }
 
+  @Override
+  public String toString() {
+    return this.debugString();
+  }
+
   /**
    * Convert the board to debug string format.
    */

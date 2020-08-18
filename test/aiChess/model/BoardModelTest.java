@@ -1,6 +1,8 @@
 package aiChess.model;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 import java.util.Optional;
 import java.util.HashSet;
@@ -55,7 +57,7 @@ public class BoardModelTest {
   }
 
   @Test
-  public void testGetSetPiece() {
+  public void testGetAllLegalMoves1() {
     // 1 _ _ B
     // 0 _ c _
     //   0 1 2
@@ -126,7 +128,7 @@ public class BoardModelTest {
   }
 
   @Test
-  public void testIsMoveLegal2() {
+  public void testGetAllLegalMoves2() {
     // 5 K _ _ _ q _
     // 4 _ B _ _ _ _
     // 3 _ _ _ _ C _
@@ -202,5 +204,53 @@ public class BoardModelTest {
     var botReturnedMoves = board.getAllLegalMoves(PlayerType.BOTTOM_PLAYER);
     assertEquals("check bottom player moves", botLegalMoves, new HashSet<>(botReturnedMoves));
     assertEquals("bottom king moves have duplicates", botLegalMoves.size(), botReturnedMoves.size());
+  }
+
+  @Test
+  public void testGetAllLegalMovesCastling() {
+    // 5 C _ K _ _ C _
+    // 4 _ _ _ _ _ _ _
+    // 3 _ _ _ _ _ _ _
+    // 2 _ _ _ _ _ _ _
+    // 1 _ q _ _ _ _ _
+    // 0 c _ k _ n c _
+    //   0 1 2 3 4 5 6
+    // Top king can only do right-castling, since (5, 1) is attacked by bottom queen.
+    // Bottom king can only do left-castling, since (0, 4) is occupied.
+    var board = new BoardModel(7, 6);
+
+    var topKing = Optional.of(PieceFactory.makePiece(PieceType.KING, PlayerType.TOP_PLAYER));
+    var topCastle = Optional.of(PieceFactory.makePiece(PieceType.CASTLE, PlayerType.TOP_PLAYER));
+
+    var botKing = Optional.of(PieceFactory.makePiece(PieceType.KING, PlayerType.BOTTOM_PLAYER));
+    var botCastle = Optional.of(PieceFactory.makePiece(PieceType.CASTLE, PlayerType.BOTTOM_PLAYER));
+    var botQueen = Optional.of(PieceFactory.makePiece(PieceType.QUEEN, PlayerType.BOTTOM_PLAYER));
+    var botKnight = Optional.of(PieceFactory.makePiece(PieceType.KNIGHT, PlayerType.BOTTOM_PLAYER));
+
+    var topKingPos        = new Position(5, 2);
+    var botKingPos        = new Position(0, 2);
+
+    board.setPieceAt(5, 2, topKing);
+    board.setPieceAt(5, 0, topCastle);
+    board.setPieceAt(5, 5, topCastle);
+
+    board.setPieceAt(0, 2, botKing);
+    board.setPieceAt(0, 0, botCastle);
+    board.setPieceAt(0, 5, botCastle);
+    board.setPieceAt(1, 1, botQueen);
+    board.setPieceAt(0, 4, botKnight);
+
+    var topLegalMoves = board.getAllLegalMoves(PlayerType.TOP_PLAYER);
+    var botLegalMoves = board.getAllLegalMoves(PlayerType.BOTTOM_PLAYER);
+
+    var topRightCastling = MoveFactory.makeCastling(topKingPos, new Position(5, 4));
+    var topLeftCastling  = MoveFactory.makeCastling(topKingPos, new Position(5, 1));
+    var botRightCastling = MoveFactory.makeCastling(botKingPos, new Position(0, 4));
+    var botLeftCastling  = MoveFactory.makeCastling(botKingPos, new Position(0, 1));
+
+    assertTrue("top legal moves includes right castling", topLegalMoves.contains(topRightCastling));
+    assertFalse("top legal moves excludes left castling", topLegalMoves.contains(topLeftCastling));
+    assertFalse("bot legal moves includes right castling", botLegalMoves.contains(botRightCastling));
+    assertTrue("bot legal moves excludes left castling", botLegalMoves.contains(botLeftCastling));
   }
 }
