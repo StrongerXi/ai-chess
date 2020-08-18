@@ -253,4 +253,51 @@ public class BoardModelTest {
     assertFalse("bot legal moves includes right castling", botLegalMoves.contains(botRightCastling));
     assertTrue("bot legal moves excludes left castling", botLegalMoves.contains(botLeftCastling));
   }
+
+  @Test
+  public void testGetAllLegalMovesPawnPromotion() {
+    // 5 _ _ _ _ _ K
+    // 4 _ _ p _ _ _
+    // 3 _ _ _ _ _ _
+    // 2 _ _ _ _ _ _
+    // 1 _ P _ _ B _
+    // 0 c _ q k _ _
+    //   0 1 2 3 4 5
+    // Promote by forward move or diagonal capturing.
+    var board = new BoardModel(6, 6);
+
+    var topKing   = Optional.of(PieceFactory.makePiece(PieceType.KING, PlayerType.TOP_PLAYER));
+    var topPawn   = Optional.of(PieceFactory.makePiece(PieceType.PAWN, PlayerType.TOP_PLAYER));
+    var topBishop = Optional.of(PieceFactory.makePiece(PieceType.BISHOP, PlayerType.TOP_PLAYER));
+
+    var botKing   = Optional.of(PieceFactory.makePiece(PieceType.KING, PlayerType.BOTTOM_PLAYER));
+    var botPawn   = Optional.of(PieceFactory.makePiece(PieceType.PAWN, PlayerType.BOTTOM_PLAYER));
+    var botCastle = Optional.of(PieceFactory.makePiece(PieceType.CASTLE, PlayerType.BOTTOM_PLAYER));
+    var botQueen  = Optional.of(PieceFactory.makePiece(PieceType.QUEEN, PlayerType.BOTTOM_PLAYER));
+
+    var topPawnPos = new Position(1, 1);
+    var botPawnPos = new Position(4, 2);
+
+    board.setPieceAt(5, 5, topKing);
+    board.setPieceAt(1, 1, topPawn);
+    board.setPieceAt(1, 4, topBishop);
+
+    board.setPieceAt(4, 2, botPawn);
+    board.setPieceAt(0, 3, botKing);
+    board.setPieceAt(0, 0, botCastle);
+    board.setPieceAt(0, 2, botQueen);
+
+    var topLegalMoves = board.getAllLegalMoves(PlayerType.TOP_PLAYER);
+    var botLegalMoves = board.getAllLegalMoves(PlayerType.BOTTOM_PLAYER);
+
+    var topPawnPromotionLeft  = MoveFactory.makePawnPromotion(topPawnPos, new Position(0, 0));
+    var topPawnPromotionMid   = MoveFactory.makePawnPromotion(topPawnPos, new Position(0, 1));
+    var topPawnPromotionRight = MoveFactory.makePawnPromotion(topPawnPos, new Position(0, 2));
+    var botPawnPromotion      = MoveFactory.makePawnPromotion(botPawnPos, new Position(5, 2));
+
+    assertTrue("top legal moves includes left pawn promotion", topLegalMoves.contains(topPawnPromotionLeft));
+    assertTrue("top legal moves includes middle pawn promotion", topLegalMoves.contains(topPawnPromotionMid));
+    assertTrue("top legal moves includes right pawn promotion", topLegalMoves.contains(topPawnPromotionRight));
+    assertFalse("bot legal moves excludes forward pawn promotion", botLegalMoves.contains(botPawnPromotion));
+  }
 }

@@ -211,14 +211,14 @@ final class PieceFactory {
       // consider the immediate forward spot
       if (0 <= nextRow && nextRow < model.height) {
         if (model.getPieceAt(row + offset, col).isEmpty()) {
-          moves.add(MoveFactory.makeRegularMove(origin, new Position(nextRow, col)));
+          moves.add(this.getPawnMove(model, origin, nextRow, col));
 
           // consider a 2-step jump
           nextRow += offset;
           if (!super.hasMoved && 
               0 <= nextRow && nextRow < model.height &&
               model.getPieceAt(nextRow, col).isEmpty()) {
-              moves.add(MoveFactory.makeRegularMove(origin, new Position(nextRow, col)));
+              moves.add(this.getPawnMove(model, origin, nextRow, col));
           }
           nextRow -= offset; // make sure `nextRow = row + offset` on exit
         }
@@ -228,12 +228,21 @@ final class PieceFactory {
           if (0 <= nextCol && nextCol < model.height) {
             var target = model.getPieceAt(nextRow, nextCol);
             if (target.isPresent() && target.get().owner != this.owner) {
-              moves.add(MoveFactory.makeRegularMove(origin, new Position(nextRow, nextCol)));
+              moves.add(this.getPawnMove(model, origin, nextRow, nextCol));
             }
           }
         }
       }
       return moves;
+    }
+
+    // pawn promotion or regular move, depending on `targetCol`
+    private Move getPawnMove(BoardModel board, Position sourcePos, int targetRow, int targetCol) {
+      var promotionRow = (this.owner == PlayerType.TOP_PLAYER) ? 0 : board.height - 1;
+      var targetPos = new Position(targetRow, targetCol);
+      return (targetRow == promotionRow) ?
+             MoveFactory.makePawnPromotion(sourcePos, targetPos) :
+             MoveFactory.makeRegularMove(sourcePos, targetPos);
     }
   }
 
