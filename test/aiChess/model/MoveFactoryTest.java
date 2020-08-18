@@ -149,4 +149,85 @@ public class MoveFactoryTest {
     assertEquals("move source back to knight\n", Optional.of(topKnight), board.getPieceAt(0, 3));
     assertEquals("move target back to pawn\n", Optional.of(bottomPawn), board.getPieceAt(1, 1));
   }
+
+
+  /* test apply and undo methods of castling move
+   * NOTE: it's _not_ about the move generation. */
+  @Test
+  public void testCastlingMove() {
+    /* 5 C _ K Q _ _
+     * 4 P P P P P P
+     * 3 _ _ _ _ _ _
+     * 2 _ _ _ _ _ _
+     * 1 p p p p p p
+     * 0 n k _ _ c n
+     *   0 1 2 3 4 5
+     */
+    Move topCastling = MoveFactory.makeCastling(new Position(5, 2), new Position(5, 1));
+    Move botCastling = MoveFactory.makeCastling(new Position(0, 1), new Position(0, 3));
+
+    var topPawn   = Optional.of(PieceFactory.makePiece(PieceType.PAWN,   PlayerType.TOP_PLAYER));
+    var topKing   = Optional.of(PieceFactory.makePiece(PieceType.KING,   PlayerType.TOP_PLAYER));
+    var topQueen  = Optional.of(PieceFactory.makePiece(PieceType.QUEEN,  PlayerType.TOP_PLAYER));
+    var topCastle = Optional.of(PieceFactory.makePiece(PieceType.CASTLE, PlayerType.TOP_PLAYER));
+    var botPawn   = Optional.of(PieceFactory.makePiece(PieceType.PAWN,   PlayerType.BOTTOM_PLAYER));
+    var botKing   = Optional.of(PieceFactory.makePiece(PieceType.KING,   PlayerType.BOTTOM_PLAYER));
+    var botKnight = Optional.of(PieceFactory.makePiece(PieceType.KNIGHT, PlayerType.BOTTOM_PLAYER));
+    var botCastle = Optional.of(PieceFactory.makePiece(PieceType.CASTLE, PlayerType.BOTTOM_PLAYER));
+
+    this.board.setPieceAt(5, 0, topCastle);
+    this.board.setPieceAt(5, 2, topKing);
+    this.board.setPieceAt(5, 3, topQueen);
+    this.board.setPieceAt(0, 0, botKnight);
+    this.board.setPieceAt(0, 1, botKing);
+    this.board.setPieceAt(0, 4, botCastle);
+    this.board.setPieceAt(0, 5, botKnight);
+    for (int col = 0; col < 6; col += 1) {
+      this.board.setPieceAt(4, col, topPawn);
+      this.board.setPieceAt(1, col, botPawn);
+    }
+
+    // Castling move apply/undo shouldn't affect other pieces
+    // So we check the whole board
+
+    /* apply move, query board state, undo move, query board state
+     * 5 _ K C Q _ _
+     * 4 P P P P P P
+     * 3 _ _ _ _ _ _
+     * 2 _ _ _ _ _ _
+     * 1 p p p p p p
+     * 0 n k _ _ c n
+     *   0 1 2 3 4 5
+     */
+    var boardCopy  = this.board.getCopy();
+    var boardMoved = this.board.getCopy();
+    boardMoved.setPieceAt(5, 0, Optional.empty());
+    boardMoved.setPieceAt(5, 1, topKing.map(p -> p.setMoved(true)));
+    boardMoved.setPieceAt(5, 2, topCastle.map(p -> p.setMoved(true)));
+
+    topCastling.apply(this.board);
+    assertEquals("board after apply top castling\n", boardMoved, this.board);
+    topCastling.undo(this.board);
+    assertEquals("board after undo top castling\n", boardCopy, this.board);
+
+    /* apply move, query board state, undo move, query board state
+     * 5 C _ K Q _ _
+     * 4 P P P P P P
+     * 3 _ _ _ _ _ _
+     * 2 _ _ _ _ _ _
+     * 1 p p p p p p
+     * 0 n _ c k _ n
+     *   0 1 2 3 4 5
+     */
+    boardMoved = this.board.getCopy();
+    boardMoved.setPieceAt(0, 1, Optional.empty());
+    boardMoved.setPieceAt(0, 2, botCastle.map(p -> p.setMoved(true)));
+    boardMoved.setPieceAt(0, 3, botKing.map(p -> p.setMoved(true)));
+    boardMoved.setPieceAt(0, 4, Optional.empty());
+
+    botCastling.apply(this.board);
+    assertEquals("board after apply bottom castling\n", boardMoved, this.board);
+    botCastling.undo(this.board);
+    assertEquals("board after undo bottom castling\n", boardCopy, this.board);
+  }
 }
