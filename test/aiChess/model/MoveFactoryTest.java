@@ -230,4 +230,72 @@ public class MoveFactoryTest {
     botCastling.undo(this.board);
     assertEquals("board after undo bottom castling\n", boardCopy, this.board);
   }
+
+  @Test
+  public void testPawnPromotionMove() {
+    /* 7 _ _ _ P _ _ _ _
+     * 6 _ _ p _ _ _ _ _
+     * 5 _ _ _ _ _ _ _ _
+     * 4 _ _ _ _ _ _ _ _
+     * 3 _ _ _ _ _ _ _ _
+     * 2 _ _ _ _ _ _ _ _
+     * 1 P P P _ _ _ _ _
+     * 0 _ _ _ _ _ _ _ _
+     *   0 1 2 3 4 5 6 7
+     */
+    Move topPawnPromotion = MoveFactory.makePawnPromotion(new Position(1, 0), new Position(0, 0));
+    Move botPawnPromotion = MoveFactory.makePawnPromotion(new Position(6, 2), new Position(7, 3));
+
+    var topPawn  = Optional.of(PieceFactory.makePiece(PieceType.PAWN,  PlayerType.TOP_PLAYER));
+    var topQueen = Optional.of(PieceFactory.makePiece(PieceType.QUEEN, PlayerType.TOP_PLAYER));
+    var botPawn  = Optional.of(PieceFactory.makePiece(PieceType.PAWN,  PlayerType.BOTTOM_PLAYER));
+    var botQueen = Optional.of(PieceFactory.makePiece(PieceType.QUEEN, PlayerType.BOTTOM_PLAYER));
+
+    this.board.setPieceAt(1, 0, topPawn);
+    this.board.setPieceAt(1, 1, topPawn);
+    this.board.setPieceAt(1, 2, topPawn);
+    this.board.setPieceAt(7, 3, topPawn);
+    this.board.setPieceAt(6, 2, botPawn);
+
+    /* apply move, query board state, undo move, query board state
+     * 7 _ _ _ _ P _ _ _
+     * 6 _ _ p _ _ _ _ _
+     * 5 _ _ _ _ _ _ _ _
+     * 4 _ _ _ _ _ _ _ _
+     * 3 _ _ _ _ _ _ _ _
+     * 2 _ _ _ _ _ _ _ _
+     * 1 _ P P _ _ _ _ _
+     * 0 Q _ _ _ _ _ _ _
+     *   0 1 2 3 4 5 6 7
+     */
+    var boardCopy  = this.board.getCopy();
+    var boardMoved = this.board.getCopy();
+    boardMoved.setPieceAt(1, 0, Optional.empty());
+    boardMoved.setPieceAt(0, 0, topQueen);
+
+    topPawnPromotion.apply(this.board);
+    assertEquals("board after apply top pawn promotion\n", boardMoved, this.board);
+    topPawnPromotion.undo(this.board);
+    assertEquals("board after undo top pawn promotion\n", boardCopy, this.board);
+
+    /* apply move, query board state, undo move, query board state
+     * 7 _ _ _ q _ _ _ _
+     * 6 _ _ _ _ _ _ _ _
+     * 5 _ _ _ _ _ _ _ _
+     * 4 _ _ _ _ _ _ _ _
+     * 3 _ _ _ _ _ _ _ _
+     * 2 _ _ _ _ _ _ _ _
+     * 1 P P P _ _ _ _ _
+     * 0 _ _ _ _ _ _ _ _
+     *   0 1 2 3 4 5 6 7
+     */
+    boardMoved = this.board.getCopy();
+    boardMoved.setPieceAt(6, 2, Optional.empty());
+    boardMoved.setPieceAt(7, 3, botQueen);
+
+    botPawnPromotion.apply(this.board);
+    assertEquals("board after apply top pawn promotion\n", boardMoved, this.board);
+    botPawnPromotion.undo(this.board);
+    assertEquals("board after undo top pawn promotion\n", boardCopy, this.board);
+  }
 }
