@@ -109,9 +109,11 @@ public final class MoveFinderFactory {
      * @param currentPlayer  is the player to make next move.
      */
     private int minimax(BoardModel board, int remainDepth, PlayerType currentPlayer) {
+      this.explored += 1;
       boolean maximizer = (currentPlayer == this.player);
       var entryOpt = this.cache.get(board, currentPlayer);
       if (entryOpt.isPresent() && entryOpt.get().depth >= remainDepth) {
+        cacheHits.merge(remainDepth, 1, Integer::sum);
         assert(entryOpt.get().type == EntryType.EXACT);
         return entryOpt.get().score;
       }
@@ -121,6 +123,7 @@ public final class MoveFinderFactory {
       if (legalMoves.isEmpty()) { // checkmate
         return score;
       }
+      this.expanded += 1;
       if (remainDepth == 0) {
         legalMoves.addAll(board.getAllLegalMoves(nextPlayer));
         score = evaluateBoard(board, this.player, legalMoves);
@@ -231,7 +234,6 @@ public final class MoveFinderFactory {
           return entry.score;
         }
       }
-      this.expanded += 1;
       var legalMoves = board.getAllLegalMoves(currentPlayer);
       var nextPlayer = flipPlayer(currentPlayer);
       if (legalMoves.isEmpty()) { // checkmate
