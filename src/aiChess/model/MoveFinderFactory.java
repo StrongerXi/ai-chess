@@ -49,6 +49,7 @@ public final class MoveFinderFactory {
   private static final class Minimax implements MoveFinder {
     private final int depth;
     private final PlayerType player; // evaluate for this player specifically
+    private int explored;
     /**
      * Constructor.
      */
@@ -68,6 +69,8 @@ public final class MoveFinderFactory {
       var bestScore = MIN_SCORE;
       var opponent = flipPlayer(player);
 
+      this.explored = 0;
+      var start = System.nanoTime(); // profiling
       // do 1 step expansion here, since `minimax` returns score only.
       for (var move : legalMoves) {
         move.apply(board);
@@ -79,6 +82,9 @@ public final class MoveFinderFactory {
         }
         move.undo(board);
       }
+      var end = System.nanoTime();
+      System.out.printf("Took %.3fs, nodes explored = %d, expanded = %d\n",
+          (end - start) / 1e9, explored);
       return bestMove;
     }
 
@@ -122,6 +128,7 @@ public final class MoveFinderFactory {
     // maps remainDepth to cache hits
     private Map<Integer, Integer> cacheHits = new TreeMap<>();
     private int explored;
+    private int expanded; // # of nodes that invoked `getAllLegalMoves`
     /**
      * Constructor.
      */
@@ -143,12 +150,13 @@ public final class MoveFinderFactory {
 
       this.cacheHits.clear();
       this.explored = 0;
+      this.expanded = 0;
       var start = System.nanoTime(); // profiling
       // do 1 step expansion here, since `alphabeta` returns score only.
       for (var move : legalMoves) {
         move.apply(board);
-        System.out.printf("score = %d, bestScore = %d, move = %s, cache size = %d\n", 
         var score = this.alphabeta(board, this.initialDepth - 1, bestScore, MAX_SCORE, opponent);
+        System.out.printf("score = %d, bestScore = %d, move = %s, cache size = %d\n",
             score, bestScore, move, this.cache.size());
         if (bestMove == null || score > bestScore) { // must be `>`
           bestMove = move;
@@ -158,7 +166,8 @@ public final class MoveFinderFactory {
       }
       this.cache.clear(); // most entries won't be re-usable
       var end = System.nanoTime();
-      System.out.printf("Took %.3fs, explored %d nodes\n", (end - start) / 1e9, explored);
+      System.out.printf("Took %.3fs, nodes explored = %d, expanded = %d\n",
+          (end - start) / 1e9, explored, expanded);
       for (var entry : this.cacheHits.entrySet()) {
         var depth = entry.getKey();
         var hits  = entry.getValue();
@@ -201,6 +210,7 @@ public final class MoveFinderFactory {
           return entry.score;
         }
       }
+      this.expanded += 1;
       var legalMoves = board.getAllLegalMoves(currentPlayer);
       var nextPlayer = flipPlayer(currentPlayer);
       if (legalMoves.isEmpty()) { // checkmate
