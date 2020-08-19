@@ -49,6 +49,7 @@ public final class MoveFinderFactory {
   private static final class Minimax implements MoveFinder {
     private final int depth;
     private final PlayerType player; // evaluate for this player specifically
+    private int explored;
     /**
      * Constructor.
      */
@@ -68,6 +69,8 @@ public final class MoveFinderFactory {
       var bestScore = MIN_SCORE;
       var opponent = flipPlayer(player);
 
+      this.explored = 0;
+      var start = System.nanoTime(); // profiling
       // do 1 step expansion here, since `minimax` returns score only.
       for (var move : legalMoves) {
         move.apply(board);
@@ -79,6 +82,9 @@ public final class MoveFinderFactory {
         }
         move.undo(board);
       }
+      var end = System.nanoTime();
+      System.out.printf("Took %.3fs, nodes explored = %d, expanded = %d\n",
+          (end - start) / 1e9, explored);
       return bestMove;
     }
 
