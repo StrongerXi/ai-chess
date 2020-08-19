@@ -141,7 +141,7 @@ public final class ChessGameModel {
     if (row < 0 || row >= board.height || col < 0 || col >= board.width) {
       throw new InvalidPositionException(row, col);
     }
-    var sourcePos = new Position(row, col);
+    var sourcePos = Position.of(row, col);
     return
       this.board.getCopy().getAllLegalMoves(this.currentPlayer).stream()
       .filter(m -> m.sourcePos.equals(sourcePos))
@@ -203,7 +203,7 @@ public final class ChessGameModel {
     }
 
     Optional<Piece> source = this.board.getPieceAt(srow, scol);
-    Position targetPos = new Position(drow, dcol);
+    Position targetPos = Position.of(drow, dcol);
     /* make sure source has a piece, and target is reachable */
     if (!source.isPresent()) {
       throw new InvalidMoveException("origin can't be empty\n");

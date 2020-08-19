@@ -105,10 +105,10 @@ final class BoardModel {
           continue;
 
         } else if (piece.owner == opponent) {
-          opponentPositions.add(new Position(row, col));
+          opponentPositions.add(Position.of(row, col));
 
         } else if (piece.type == PieceType.KING) {
-          kingPosHolder = new Position(row, col);
+          kingPosHolder = Position.of(row, col);
         }
       }
     }

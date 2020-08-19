@@ -234,7 +234,7 @@ public class SwingView implements ChessView {
           TileState.ATTACKABLE : TileState.REACHABLE;
         this.setBackgroundAt(pos.row, pos.col, state);
       }
-      lastSelected = Optional.of(new Position(row, col));
+      lastSelected = Optional.of(Position.of(row, col));
     });
   }
 

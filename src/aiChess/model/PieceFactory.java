@@ -52,7 +52,7 @@ final class PieceFactory {
     }
     public Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
       Collection<Move> moves = new ArrayList<>();
-      var kingPos = new Position(row, col);
+      var kingPos = Position.of(row, col);
       addCrossMoves(model, owner, kingPos, 1, moves);
       addDiagonalMoves(model, owner, kingPos, 1, moves);
       tryAddCastlingMoves(model, row, col, moves);
@@ -69,7 +69,7 @@ final class PieceFactory {
       // - in between pieces empty and not under attack
       // - king not in check (i.e. under attack)
       var king = board.getPieceAt(row, col).get();
-      var kingPos = new Position(row, col);
+      var kingPos = Position.of(row, col);
       if (king.hasMoved) {
         return;
       }
@@ -98,14 +98,14 @@ final class PieceFactory {
               allEmpty = false;
               break;
             }
-            safePos.add(new Position(row, col + i * colDelta));
+            safePos.add(Position.of(row, col + i * colDelta));
           }
           // make sure king and those empty positions are not under attack
           safePos.add(kingPos);
           var opponent = (this.owner == PlayerType.TOP_PLAYER) ?
                           PlayerType.BOTTOM_PLAYER : PlayerType.TOP_PLAYER;
           if (allEmpty && anyUnderAttack(safePos, board, opponent)) {
-            moves.add(MoveFactory.makeCastling(kingPos, new Position(row, castleCol - colDelta)));
+            moves.add(MoveFactory.makeCastling(kingPos, Position.of(row, castleCol - colDelta)));
           }
         }
       }
@@ -128,8 +128,9 @@ final class PieceFactory {
           if (piece.type != PieceType.KING) {
             moves = piece.getAllMovesFrom(board, row, col);
           } else if (piece.type == PieceType.KING) {
-            addCrossMoves(board, piece.owner, new Position(row, col), 1, moves);
-            addDiagonalMoves(board, piece.owner, new Position(row, col), 1, moves);
+            var pos = Position.of(row, col);
+            addCrossMoves(board, piece.owner, pos, 1, moves);
+            addDiagonalMoves(board, piece.owner, pos, 1, moves);
           }
           if (moves.stream().anyMatch(m -> positions.contains(m.targetPos))) {
             // some move from (row, col) attacks a position in `positions`
@@ -152,7 +153,7 @@ final class PieceFactory {
     public Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
       /* There is no step size limit for Queen */
       Collection<Move> moves = new ArrayList<>();
-      Position origin = new Position(row, col);
+      Position origin = Position.of(row, col);
       addCrossMoves(model, owner, origin, MAX_STEP, moves);
       addDiagonalMoves(model, owner, origin, MAX_STEP, moves);
       return moves;
@@ -170,7 +171,7 @@ final class PieceFactory {
     public Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
       Collection<Move> moves = new ArrayList<>();
       // There is no step size limit for Bishop
-      addDiagonalMoves(model, owner, new Position(row, col), MAX_STEP, moves);
+      addDiagonalMoves(model, owner, Position.of(row, col), MAX_STEP, moves);
       return moves;
     }
   }
@@ -186,7 +187,7 @@ final class PieceFactory {
     public Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
       Collection<Move> moves = new ArrayList<>();
       // There is no step size limit for Castle
-      addCrossMoves(model, owner, new Position(row, col), MAX_STEP, moves);
+      addCrossMoves(model, owner, Position.of(row, col), MAX_STEP, moves);
       return moves;
     }
   }
@@ -202,7 +203,7 @@ final class PieceFactory {
     public Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
 
       Collection<Move> moves = new ArrayList<>();
-      Position origin = new Position(row, col);
+      Position origin = Position.of(row, col);
 
       // top owner's pawn only moves downward
       int offset = this.owner == PlayerType.TOP_PLAYER ? -1 : 1;
@@ -239,7 +240,7 @@ final class PieceFactory {
     // pawn promotion or regular move, depending on `targetCol`
     private Move getPawnMove(BoardModel board, Position sourcePos, int targetRow, int targetCol) {
       var promotionRow = (this.owner == PlayerType.TOP_PLAYER) ? 0 : board.height - 1;
-      var targetPos = new Position(targetRow, targetCol);
+      var targetPos = Position.of(targetRow, targetCol);
       return (targetRow == promotionRow) ?
              MoveFactory.makePawnPromotion(sourcePos, targetPos) :
              MoveFactory.makeRegularMove(sourcePos, targetPos);
@@ -257,7 +258,7 @@ final class PieceFactory {
     }
     Collection<Move> getAllMovesFrom(BoardModel model, int row, int col) {
       Collection<Move> moves = new ArrayList<>();
-      addMovesInDirection(model, owner, new Position(row, col), knightOffsets, 1, moves);
+      addMovesInDirection(model, owner, Position.of(row, col), knightOffsets, 1, moves);
       return moves;
     }
   }
@@ -341,7 +342,7 @@ final class PieceFactory {
            row += dr, col += dc, steps += 1) {
 
         Optional<Piece> target = model.getPieceAt(row, col);
-        Move move = MoveFactory.makeRegularMove(origin, new Position(row, col));
+        Move move = MoveFactory.makeRegularMove(origin, Position.of(row, col));
 
         /* stop after encountering another piece */
         if (target.isPresent()) {
