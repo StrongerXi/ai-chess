@@ -99,8 +99,8 @@ public class BoardModelTest {
     var botKing = Optional.of(PieceFactory.makePiece(PieceType.KING, PlayerType.BOTTOM_PLAYER));
     board.setPieceAt(2, 1, topKing);
     board.setPieceAt(0, 1, botKing);
-    var topKingPos = new Position(2, 1);
-    var botKingPos = new Position(0, 1);
+    var topKingPos = Position.of(2, 1);
+    var botKingPos = Position.of(0, 1);
     var topLegalMoves = new HashSet<Move>();
     var botLegalMoves = new HashSet<Move>();
 
@@ -109,7 +109,7 @@ public class BoardModelTest {
         // neither king can move to the middle row (row == 1)
         var topLegal = row == 2;
         var botLegal = row == 0;
-        var targetPos = new Position(row, col);
+        var targetPos = Position.of(row, col);
         // make sure the moves are pseudo-legal.
         if (row == 2 && Math.abs(1 - col) == 1) {
           topLegalMoves.add(MoveFactory.makeRegularMove(topKingPos, targetPos));
@@ -150,16 +150,16 @@ public class BoardModelTest {
     var botPawn = Optional.of(PieceFactory.makePiece(PieceType.PAWN, PlayerType.BOTTOM_PLAYER));
     var botKnight = Optional.of(PieceFactory.makePiece(PieceType.KNIGHT, PlayerType.BOTTOM_PLAYER));
 
-    var topKingPos   = new Position(5, 0);
-    var topCastlePos = new Position(3, 4);
-    var topQueenPos  = new Position(1, 0);
-    var topBishopPos = new Position(4, 1);
+    var topKingPos   = Position.of(5, 0);
+    var topCastlePos = Position.of(3, 4);
+    var topQueenPos  = Position.of(1, 0);
+    var topBishopPos = Position.of(4, 1);
 
-    var botKingPos   = new Position(1, 4);
-    var botCastlePos = new Position(0, 0);
-    var botQueenPos  = new Position(5, 4);
-    var botPawnPos   = new Position(2, 3);
-    var botKnightPos = new Position(1, 3);
+    var botKingPos   = Position.of(1, 4);
+    var botCastlePos = Position.of(0, 0);
+    var botQueenPos  = Position.of(5, 4);
+    var botPawnPos   = Position.of(2, 3);
+    var botKnightPos = Position.of(1, 3);
 
     board.setPieceAt(5, 0, topKing);
     board.setPieceAt(3, 4, topCastle);
@@ -176,20 +176,20 @@ public class BoardModelTest {
     var botLegalMoves = new HashSet<Move>();
 
     // top king escapes queen attack
-    topLegalMoves.add(MoveFactory.makeRegularMove(topKingPos, new Position(4, 0)));
+    topLegalMoves.add(MoveFactory.makeRegularMove(topKingPos, Position.of(4, 0)));
     // top castle, save king or capture opponent king
     topLegalMoves.add(MoveFactory.makeRegularMove(topCastlePos, botQueenPos));
     topLegalMoves.add(MoveFactory.makeRegularMove(topCastlePos, botKingPos));
     // top queen can't save or capture
     // top bishop can block queen to save king
-    topLegalMoves.add(MoveFactory.makeRegularMove(topBishopPos, new Position(5, 2)));
+    topLegalMoves.add(MoveFactory.makeRegularMove(topBishopPos, Position.of(5, 2)));
 
 
     // bottom king escape castle attack (to left or right)
-    botLegalMoves.add(MoveFactory.makeRegularMove(botKingPos, new Position(0, 3)));
-    botLegalMoves.add(MoveFactory.makeRegularMove(botKingPos, new Position(2, 5)));
-    botLegalMoves.add(MoveFactory.makeRegularMove(botKingPos, new Position(1, 5)));
-    botLegalMoves.add(MoveFactory.makeRegularMove(botKingPos, new Position(0, 5)));
+    botLegalMoves.add(MoveFactory.makeRegularMove(botKingPos, Position.of(0, 3)));
+    botLegalMoves.add(MoveFactory.makeRegularMove(botKingPos, Position.of(2, 5)));
+    botLegalMoves.add(MoveFactory.makeRegularMove(botKingPos, Position.of(1, 5)));
+    botLegalMoves.add(MoveFactory.makeRegularMove(botKingPos, Position.of(0, 5)));
     // bottom castle can't save or capture
     // bottom queen can capture castle to save king or capture opponent King
     botLegalMoves.add(MoveFactory.makeRegularMove(botQueenPos, topCastlePos));
@@ -227,8 +227,8 @@ public class BoardModelTest {
     var botQueen = Optional.of(PieceFactory.makePiece(PieceType.QUEEN, PlayerType.BOTTOM_PLAYER));
     var botKnight = Optional.of(PieceFactory.makePiece(PieceType.KNIGHT, PlayerType.BOTTOM_PLAYER));
 
-    var topKingPos        = new Position(5, 2);
-    var botKingPos        = new Position(0, 2);
+    var topKingPos        = Position.of(5, 2);
+    var botKingPos        = Position.of(0, 2);
 
     board.setPieceAt(5, 2, topKing);
     board.setPieceAt(5, 0, topCastle);
@@ -243,10 +243,10 @@ public class BoardModelTest {
     var topLegalMoves = board.getAllLegalMoves(PlayerType.TOP_PLAYER);
     var botLegalMoves = board.getAllLegalMoves(PlayerType.BOTTOM_PLAYER);
 
-    var topRightCastling = MoveFactory.makeCastling(topKingPos, new Position(5, 4));
-    var topLeftCastling  = MoveFactory.makeCastling(topKingPos, new Position(5, 1));
-    var botRightCastling = MoveFactory.makeCastling(botKingPos, new Position(0, 4));
-    var botLeftCastling  = MoveFactory.makeCastling(botKingPos, new Position(0, 1));
+    var topRightCastling = MoveFactory.makeCastling(topKingPos, Position.of(5, 4));
+    var topLeftCastling  = MoveFactory.makeCastling(topKingPos, Position.of(5, 1));
+    var botRightCastling = MoveFactory.makeCastling(botKingPos, Position.of(0, 4));
+    var botLeftCastling  = MoveFactory.makeCastling(botKingPos, Position.of(0, 1));
 
     assertTrue("top legal moves includes right castling", topLegalMoves.contains(topRightCastling));
     assertFalse("top legal moves excludes left castling", topLegalMoves.contains(topLeftCastling));
@@ -275,8 +275,8 @@ public class BoardModelTest {
     var botCastle = Optional.of(PieceFactory.makePiece(PieceType.CASTLE, PlayerType.BOTTOM_PLAYER));
     var botQueen  = Optional.of(PieceFactory.makePiece(PieceType.QUEEN, PlayerType.BOTTOM_PLAYER));
 
-    var topPawnPos = new Position(1, 1);
-    var botPawnPos = new Position(4, 2);
+    var topPawnPos = Position.of(1, 1);
+    var botPawnPos = Position.of(4, 2);
 
     board.setPieceAt(5, 5, topKing);
     board.setPieceAt(1, 1, topPawn);
@@ -290,10 +290,10 @@ public class BoardModelTest {
     var topLegalMoves = board.getAllLegalMoves(PlayerType.TOP_PLAYER);
     var botLegalMoves = board.getAllLegalMoves(PlayerType.BOTTOM_PLAYER);
 
-    var topPawnPromotionLeft  = MoveFactory.makePawnPromotion(topPawnPos, new Position(0, 0));
-    var topPawnPromotionMid   = MoveFactory.makePawnPromotion(topPawnPos, new Position(0, 1));
-    var topPawnPromotionRight = MoveFactory.makePawnPromotion(topPawnPos, new Position(0, 2));
-    var botPawnPromotion      = MoveFactory.makePawnPromotion(botPawnPos, new Position(5, 2));
+    var topPawnPromotionLeft  = MoveFactory.makePawnPromotion(topPawnPos, Position.of(0, 0));
+    var topPawnPromotionMid   = MoveFactory.makePawnPromotion(topPawnPos, Position.of(0, 1));
+    var topPawnPromotionRight = MoveFactory.makePawnPromotion(topPawnPos, Position.of(0, 2));
+    var botPawnPromotion      = MoveFactory.makePawnPromotion(botPawnPos, Position.of(5, 2));
 
     assertTrue("top legal moves includes left pawn promotion", topLegalMoves.contains(topPawnPromotionLeft));
     assertTrue("top legal moves includes middle pawn promotion", topLegalMoves.contains(topPawnPromotionMid));

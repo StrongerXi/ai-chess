@@ -13,10 +13,10 @@ public class MoveTest {
   /* Test how different attributes affect Regular Move equality */
   @Test
   public void testRegularMoveEquality() {
-    Position pos1 = new Position(2, 2);
-    Position pos2 = new Position(1, 3);
-    Position pos3 = new Position(4, 2);
-    Position pos4 = new Position(3, 0);
+    Position pos1 = Position.of(2, 2);
+    Position pos2 = Position.of(1, 3);
+    Position pos3 = Position.of(4, 2);
+    Position pos4 = Position.of(3, 0);
     Move m1 = MoveFactory.makeRegularMove(pos1, pos2);
     Move m2 = MoveFactory.makeRegularMove(pos1, pos3);
     Move m3 = MoveFactory.makeRegularMove(pos3, pos2);
@@ -36,10 +36,10 @@ public class MoveTest {
   /* Test how different attributes affect Pawn Promotion Move equality */
   @Test
   public void testPawnPromotionMove() {
-    Position pos1 = new Position(2, 2);
-    Position pos2 = new Position(1, 3);
-    Position pos3 = new Position(4, 2);
-    Position pos4 = new Position(3, 0);
+    Position pos1 = Position.of(2, 2);
+    Position pos2 = Position.of(1, 3);
+    Position pos3 = Position.of(4, 2);
+    Position pos4 = Position.of(3, 0);
     Move m1 = MoveFactory.makePawnPromotion(pos1, pos2);
     Move m2 = MoveFactory.makePawnPromotion(pos1, pos3);
     Move m3 = MoveFactory.makePawnPromotion(pos3, pos2);

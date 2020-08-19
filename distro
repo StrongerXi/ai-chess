@@ -1,0 +1,2 @@
+mvn clean compile assembly:single
+mv target/0-chess-jar-with-dependencies.jar target/chess.jar

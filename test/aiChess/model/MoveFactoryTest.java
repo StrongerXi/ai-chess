@@ -32,7 +32,7 @@ public class MoveFactoryTest {
   public void testSelfMove() {
     // _ K
     // _ _ 
-    var pos11 = new Position(1, 1); 
+    var pos11 = Position.of(1, 1); 
     var king = Optional.of(PieceFactory.makePiece(PieceType.KING, PlayerType.TOP_PLAYER));
     var kingMoved = Optional.of(PieceFactory.makePieceMoved(PieceType.KING, PlayerType.TOP_PLAYER, true));
     var move = MoveFactory.makeRegularMove(pos11, pos11);
@@ -41,7 +41,7 @@ public class MoveFactoryTest {
     move.apply(this.board);
     for (int row = 0; row < board.height; row += 1) {
       for (int col = 0; col < board.width; col += 1) {
-        var pos = new Position(row, col);
+        var pos = Position.of(row, col);
         if (row == 1 && col == 1) {
           assertEquals("king tile at " + pos, kingMoved, board.getPieceAt(row, col));
         } else {
@@ -53,7 +53,7 @@ public class MoveFactoryTest {
     move.undo(this.board);
     for (int row = 0; row < board.height; row += 1) {
       for (int col = 0; col < board.width; col += 1) {
-        var pos = new Position(row, col);
+        var pos = Position.of(row, col);
         if (row == 1 && col == 1) {
           assertEquals("king tile at " + pos, king, board.getPieceAt(row, col));
         } else {
@@ -72,12 +72,12 @@ public class MoveFactoryTest {
      * _ p _ _
      * _ _ _ K
      */
-    Position pos11 = new Position(1, 1); // bottom pawn
-    Position pos22 = new Position(2, 2); // top bishop
-    Position pos31 = new Position(3, 1); // top castle
-    Position pos03 = new Position(0, 3); // top knight
-    Position pos33 = new Position(3, 3);
-    Position pos12 = new Position(1, 2);
+    Position pos11 = Position.of(1, 1); // bottom pawn
+    Position pos22 = Position.of(2, 2); // top bishop
+    Position pos31 = Position.of(3, 1); // top castle
+    Position pos03 = Position.of(0, 3); // top knight
+    Position pos33 = Position.of(3, 3);
+    Position pos12 = Position.of(1, 2);
 
     /* regualr moves without attacking */
     Move castleRight = MoveFactory.makeRegularMove(pos31, pos33);
@@ -163,8 +163,8 @@ public class MoveFactoryTest {
      * 0 n k _ _ c n
      *   0 1 2 3 4 5
      */
-    Move topCastling = MoveFactory.makeCastling(new Position(5, 2), new Position(5, 1));
-    Move botCastling = MoveFactory.makeCastling(new Position(0, 1), new Position(0, 3));
+    Move topCastling = MoveFactory.makeCastling(Position.of(5, 2), Position.of(5, 1));
+    Move botCastling = MoveFactory.makeCastling(Position.of(0, 1), Position.of(0, 3));
 
     var topPawn   = Optional.of(PieceFactory.makePiece(PieceType.PAWN,   PlayerType.TOP_PLAYER));
     var topKing   = Optional.of(PieceFactory.makePiece(PieceType.KING,   PlayerType.TOP_PLAYER));
@@ -243,8 +243,8 @@ public class MoveFactoryTest {
      * 0 _ _ _ _ _ _ _ _
      *   0 1 2 3 4 5 6 7
      */
-    Move topPawnPromotion = MoveFactory.makePawnPromotion(new Position(1, 0), new Position(0, 0));
-    Move botPawnPromotion = MoveFactory.makePawnPromotion(new Position(6, 2), new Position(7, 3));
+    Move topPawnPromotion = MoveFactory.makePawnPromotion(Position.of(1, 0), Position.of(0, 0));
+    Move botPawnPromotion = MoveFactory.makePawnPromotion(Position.of(6, 2), Position.of(7, 3));
 
     var topPawn  = Optional.of(PieceFactory.makePiece(PieceType.PAWN,  PlayerType.TOP_PLAYER));
     var topQueen = Optional.of(PieceFactory.makePiece(PieceType.QUEEN, PlayerType.TOP_PLAYER));

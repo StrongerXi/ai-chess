@@ -9,6 +9,6 @@ public class InvalidPositionException extends RuntimeException {
   }
 
   public InvalidPositionException(int row, int col) {
-    this(new Position(row, col));
+    this(Position.of(row, col));
   }
 }

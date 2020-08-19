@@ -54,10 +54,10 @@ public class PieceFactoryTest {
     Set<Move> pawn21Moves = new HashSet<>(bottomPawn.getAllMovesFrom(this.board, 2, 1));
     Set<Move> pawn51ExpectedMoves = new HashSet<>();
     Set<Move> pawn21ExpectedMoves = new HashSet<>();
-    pawn51ExpectedMoves.add(MoveFactory.makeRegularMove(new Position(5, 1), new Position(4, 1)));
-    pawn51ExpectedMoves.add(MoveFactory.makeRegularMove(new Position(5, 1), new Position(3, 1)));
-    pawn21ExpectedMoves.add(MoveFactory.makeRegularMove(new Position(2, 1), new Position(3, 1)));
-    pawn21ExpectedMoves.add(MoveFactory.makeRegularMove(new Position(2, 1), new Position(4, 1)));
+    pawn51ExpectedMoves.add(MoveFactory.makeRegularMove(Position.of(5, 1), Position.of(4, 1)));
+    pawn51ExpectedMoves.add(MoveFactory.makeRegularMove(Position.of(5, 1), Position.of(3, 1)));
+    pawn21ExpectedMoves.add(MoveFactory.makeRegularMove(Position.of(2, 1), Position.of(3, 1)));
+    pawn21ExpectedMoves.add(MoveFactory.makeRegularMove(Position.of(2, 1), Position.of(4, 1)));
     assertEquals("downward 2 possible moves\n", pawn51ExpectedMoves, pawn51Moves);
     assertEquals("upward 2 possible moves\n", pawn21ExpectedMoves, pawn21Moves);
 
@@ -66,8 +66,8 @@ public class PieceFactoryTest {
     Set<Move> pawn23Moves = new HashSet<>(bottomPawn.getAllMovesFrom(this.board, 2, 3));
     Set<Move> pawn43ExpectedMoves = new HashSet<>();
     Set<Move> pawn23ExpectedMoves = new HashSet<>();
-    pawn43ExpectedMoves.add(MoveFactory.makeRegularMove(new Position(4, 3), new Position(3, 3)));
-    pawn23ExpectedMoves.add(MoveFactory.makeRegularMove(new Position(2, 3), new Position(3, 3)));
+    pawn43ExpectedMoves.add(MoveFactory.makeRegularMove(Position.of(4, 3), Position.of(3, 3)));
+    pawn23ExpectedMoves.add(MoveFactory.makeRegularMove(Position.of(2, 3), Position.of(3, 3)));
     assertEquals("downward 1 possible moves\n", pawn43ExpectedMoves, pawn43Moves);
     assertEquals("upward 1 possible moves\n", pawn23ExpectedMoves, pawn23Moves);
 
@@ -89,8 +89,8 @@ public class PieceFactoryTest {
     pawn21Moves = new HashSet<>(bottomPawn.getAllMovesFrom(this.board, 2, 1));
     pawn51ExpectedMoves = new HashSet<>();
     pawn21ExpectedMoves = new HashSet<>();
-    pawn51ExpectedMoves.add(MoveFactory.makeRegularMove(new Position(5, 1), new Position(4, 1)));
-    pawn21ExpectedMoves.add(MoveFactory.makeRegularMove(new Position(2, 1), new Position(3, 1)));
+    pawn51ExpectedMoves.add(MoveFactory.makeRegularMove(Position.of(5, 1), Position.of(4, 1)));
+    pawn21ExpectedMoves.add(MoveFactory.makeRegularMove(Position.of(2, 1), Position.of(3, 1)));
     assertEquals("downward 1 possible moves\n", pawn51ExpectedMoves, pawn51Moves);
     assertEquals("upward 1 possible moves\n", pawn21ExpectedMoves, pawn21Moves);
   }
@@ -116,31 +116,31 @@ public class PieceFactoryTest {
     /* top pawn can attack 2 bottom pawns */
     Set<Move> pawn32Moves = new HashSet<>(topPawn.getAllMovesFrom(this.board, 3, 2));
     Set<Move> pawn32ExpectedMoves = new HashSet<>();
-    pawn32ExpectedMoves.add(MoveFactory.makeRegularMove(new Position(3, 2), new Position(2, 3)));
-    pawn32ExpectedMoves.add(MoveFactory.makeRegularMove(new Position(3, 2), new Position(2, 1)));
-    pawn32ExpectedMoves.add(MoveFactory.makeRegularMove(new Position(3, 2), new Position(2, 2)));
+    pawn32ExpectedMoves.add(MoveFactory.makeRegularMove(Position.of(3, 2), Position.of(2, 3)));
+    pawn32ExpectedMoves.add(MoveFactory.makeRegularMove(Position.of(3, 2), Position.of(2, 1)));
+    pawn32ExpectedMoves.add(MoveFactory.makeRegularMove(Position.of(3, 2), Position.of(2, 2)));
     assertEquals("diagonal 2, forward 1 moves\n", pawn32ExpectedMoves, pawn32Moves);
 
     /* right pawn can attack top pawn */
     Set<Move> pawn21Moves = new HashSet<>(bottomPawn.getAllMovesFrom(this.board, 2, 1));
     Set<Move> pawn21ExpectedMoves = new HashSet<>();
-    pawn21ExpectedMoves.add(MoveFactory.makeRegularMove(new Position(2, 1), new Position(3, 2)));
-    pawn21ExpectedMoves.add(MoveFactory.makeRegularMove(new Position(2, 1), new Position(3, 1)));
-    pawn21ExpectedMoves.add(MoveFactory.makeRegularMove(new Position(2, 1), new Position(4, 1)));
+    pawn21ExpectedMoves.add(MoveFactory.makeRegularMove(Position.of(2, 1), Position.of(3, 2)));
+    pawn21ExpectedMoves.add(MoveFactory.makeRegularMove(Position.of(2, 1), Position.of(3, 1)));
+    pawn21ExpectedMoves.add(MoveFactory.makeRegularMove(Position.of(2, 1), Position.of(4, 1)));
     assertEquals("right up diagonal 1, forward 2 move\n", pawn21ExpectedMoves, pawn21Moves);
 
     /* right pawn can attack top pawn */
     Set<Move> pawn23Moves = new HashSet<>(bottomPawn.getAllMovesFrom(this.board, 2, 3));
     Set<Move> pawn23ExpectedMoves = new HashSet<>();
-    pawn23ExpectedMoves.add(MoveFactory.makeRegularMove(new Position(2, 3), new Position(3, 2)));
-    pawn23ExpectedMoves.add(MoveFactory.makeRegularMove(new Position(2, 3), new Position(3, 3)));
-    pawn23ExpectedMoves.add(MoveFactory.makeRegularMove(new Position(2, 3), new Position(4, 3)));
+    pawn23ExpectedMoves.add(MoveFactory.makeRegularMove(Position.of(2, 3), Position.of(3, 2)));
+    pawn23ExpectedMoves.add(MoveFactory.makeRegularMove(Position.of(2, 3), Position.of(3, 3)));
+    pawn23ExpectedMoves.add(MoveFactory.makeRegularMove(Position.of(2, 3), Position.of(4, 3)));
     assertEquals("left up diagonal 1, forward 2 move\n", pawn23ExpectedMoves, pawn23Moves);
 
     /* bottom pawn can't attack ally */
     Set<Move> pawn12Moves = new HashSet<>(bottomPawn.getAllMovesFrom(this.board, 1, 2));
     Set<Move> pawn12ExpectedMoves = new HashSet<>();
-    pawn12ExpectedMoves.add(MoveFactory.makeRegularMove(new Position(1, 2), new Position(2, 2)));
+    pawn12ExpectedMoves.add(MoveFactory.makeRegularMove(Position.of(1, 2), Position.of(2, 2)));
     assertEquals("can't attack ally, only forward 1 move\n", pawn12ExpectedMoves, pawn12Moves);
   }
 
@@ -165,20 +165,20 @@ public class PieceFactoryTest {
 
     Set<Move> castleMoves = new HashSet<>(topCastle.getAllMovesFrom(this.board, 1, 2));
     Set<Move> castleExpectedMoves = new HashSet<>();
-    Position castlePos = new Position(1, 2);
+    Position castlePos = Position.of(1, 2);
     /* castle can attack bottom enemy pawn */
-    castleExpectedMoves.add(MoveFactory.makeRegularMove(castlePos, new Position(0, 2)));
+    castleExpectedMoves.add(MoveFactory.makeRegularMove(castlePos, Position.of(0, 2)));
     /* castle can't attack left ally pawn */
-    castleExpectedMoves.add(MoveFactory.makeRegularMove(castlePos, new Position(1, 1)));
+    castleExpectedMoves.add(MoveFactory.makeRegularMove(castlePos, Position.of(1, 1)));
     /* castle can attack top enemy pawn */
-    castleExpectedMoves.add(MoveFactory.makeRegularMove(castlePos, new Position(2, 2)));
-    castleExpectedMoves.add(MoveFactory.makeRegularMove(castlePos, new Position(3, 2)));
-    castleExpectedMoves.add(MoveFactory.makeRegularMove(castlePos, new Position(4, 2)));
+    castleExpectedMoves.add(MoveFactory.makeRegularMove(castlePos, Position.of(2, 2)));
+    castleExpectedMoves.add(MoveFactory.makeRegularMove(castlePos, Position.of(3, 2)));
+    castleExpectedMoves.add(MoveFactory.makeRegularMove(castlePos, Position.of(4, 2)));
     /* castle can't attack right ally pawn */
-    castleExpectedMoves.add(MoveFactory.makeRegularMove(castlePos, new Position(1, 3)));
-    castleExpectedMoves.add(MoveFactory.makeRegularMove(castlePos, new Position(1, 4)));
-    castleExpectedMoves.add(MoveFactory.makeRegularMove(castlePos, new Position(1, 5)));
-    castleExpectedMoves.add(MoveFactory.makeRegularMove(castlePos, new Position(1, 6)));
+    castleExpectedMoves.add(MoveFactory.makeRegularMove(castlePos, Position.of(1, 3)));
+    castleExpectedMoves.add(MoveFactory.makeRegularMove(castlePos, Position.of(1, 4)));
+    castleExpectedMoves.add(MoveFactory.makeRegularMove(castlePos, Position.of(1, 5)));
+    castleExpectedMoves.add(MoveFactory.makeRegularMove(castlePos, Position.of(1, 6)));
 
     assertEquals("test castle moves\n", castleExpectedMoves, castleMoves);
   }
@@ -216,16 +216,16 @@ public class PieceFactoryTest {
     /* only enemy positions are attackable */
     Set<Move> knightMoves = new HashSet<>(topKnight.getAllMovesFrom(this.board, 2, 2));
     Set<Move> knightExpectedMoves = new HashSet<>();
-    Position knightPos = new Position(2, 2);
+    Position knightPos = Position.of(2, 2);
 
     /* up right bishop */
-    knightExpectedMoves.add(MoveFactory.makeRegularMove(knightPos, new Position(4, 3)));
+    knightExpectedMoves.add(MoveFactory.makeRegularMove(knightPos, Position.of(4, 3)));
     /* right down knight */
-    knightExpectedMoves.add(MoveFactory.makeRegularMove(knightPos, new Position(1, 4)));
+    knightExpectedMoves.add(MoveFactory.makeRegularMove(knightPos, Position.of(1, 4)));
     /* left up pawn */
-    knightExpectedMoves.add(MoveFactory.makeRegularMove(knightPos, new Position(3, 0)));
+    knightExpectedMoves.add(MoveFactory.makeRegularMove(knightPos, Position.of(3, 0)));
     /* left down pawn */
-    knightExpectedMoves.add(MoveFactory.makeRegularMove(knightPos, new Position(1, 0)));
+    knightExpectedMoves.add(MoveFactory.makeRegularMove(knightPos, Position.of(1, 0)));
 
     assertEquals("test knight moves\n", knightExpectedMoves, knightMoves);
   }
@@ -255,19 +255,19 @@ public class PieceFactoryTest {
     /* only enemy positions are attackable */
     Set<Move> bishopMoves = new HashSet<>(topBishop.getAllMovesFrom(this.board, 2, 2));
     Set<Move> bishopExpectedMoves = new HashSet<>();
-    Position bishopPos = new Position(2, 2);
+    Position bishopPos = Position.of(2, 2);
 
     /* top left pawn inclusive */
-    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, new Position(3, 1)));
-    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, new Position(4, 0)));
+    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, Position.of(3, 1)));
+    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, Position.of(4, 0)));
     /* top right pawn inclusive */
-    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, new Position(3, 3)));
-    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, new Position(4, 4)));
+    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, Position.of(3, 3)));
+    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, Position.of(4, 4)));
     /* bottom right pawn inclusive */
-    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, new Position(1, 3)));
-    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, new Position(0, 4)));
+    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, Position.of(1, 3)));
+    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, Position.of(0, 4)));
     /* bottom left pawn exclusive */
-    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, new Position(1, 1)));
+    bishopExpectedMoves.add(MoveFactory.makeRegularMove(bishopPos, Position.of(1, 1)));
 
     assertEquals("test bishop moves\n", bishopExpectedMoves, bishopMoves);
   }
@@ -301,28 +301,28 @@ public class PieceFactoryTest {
     /* only enemy positions are attackable */
     Set<Move> queenMoves = new HashSet<>(topQueen.getAllMovesFrom(this.board, 2, 2));
     Set<Move> queenExpectedMoves = new HashSet<>();
-    Position queenPos = new Position(2, 2);
+    Position queenPos = Position.of(2, 2);
 
     /* top left pawn inclusive */
-    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(3, 1)));
-    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(4, 0)));
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, Position.of(3, 1)));
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, Position.of(4, 0)));
     /* top right pawn inclusive */
-    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(3, 3)));
-    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(4, 4)));
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, Position.of(3, 3)));
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, Position.of(4, 4)));
     /* bottom right pawn exclusive */
-    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(1, 3)));
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, Position.of(1, 3)));
     /* bottom left pawn exclusive */
-    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(1, 1)));
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, Position.of(1, 1)));
     /* top pawn exclusive */
-    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(3, 2)));
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, Position.of(3, 2)));
     /* bottom pawn inclusive */
-    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(1, 2)));
-    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(0, 2)));
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, Position.of(1, 2)));
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, Position.of(0, 2)));
     /* left pawn exclusive */
-    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(2, 1)));
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, Position.of(2, 1)));
     /* right pawn inclusive */
-    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(2, 3)));
-    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, new Position(2, 4)));
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, Position.of(2, 3)));
+    queenExpectedMoves.add(MoveFactory.makeRegularMove(queenPos, Position.of(2, 4)));
 
     assertEquals("test queen moves\n", queenExpectedMoves, queenMoves);
   }
@@ -352,22 +352,22 @@ public class PieceFactoryTest {
     /* only enemy positions are attackable */
     Set<Move> kingMoves = new HashSet<>(bottomKing.getAllMovesFrom(this.board, 2, 2));
     Set<Move> kingExpectedMoves = new HashSet<>();
-    Position kingPos = new Position(2, 2);
+    Position kingPos = Position.of(2, 2);
 
     /* top left empty */
-    kingExpectedMoves.add(MoveFactory.makeRegularMove(kingPos, new Position(3, 1)));
+    kingExpectedMoves.add(MoveFactory.makeRegularMove(kingPos, Position.of(3, 1)));
     /* top right enemy pawn inclusive */
-    kingExpectedMoves.add(MoveFactory.makeRegularMove(kingPos, new Position(3, 3)));
+    kingExpectedMoves.add(MoveFactory.makeRegularMove(kingPos, Position.of(3, 3)));
     /* bottom right ally pawn exclusive */
     /* bottom left empty */
-    kingExpectedMoves.add(MoveFactory.makeRegularMove(kingPos, new Position(1, 1)));
+    kingExpectedMoves.add(MoveFactory.makeRegularMove(kingPos, Position.of(1, 1)));
     /* top empty */
-    kingExpectedMoves.add(MoveFactory.makeRegularMove(kingPos, new Position(3, 2)));
+    kingExpectedMoves.add(MoveFactory.makeRegularMove(kingPos, Position.of(3, 2)));
     /* bottom enemy pawn inclusive  */
-    kingExpectedMoves.add(MoveFactory.makeRegularMove(kingPos, new Position(1, 2)));
+    kingExpectedMoves.add(MoveFactory.makeRegularMove(kingPos, Position.of(1, 2)));
     /* left ally pawn exclusive */
     /* right empty */
-    kingExpectedMoves.add(MoveFactory.makeRegularMove(kingPos, new Position(2, 3)));
+    kingExpectedMoves.add(MoveFactory.makeRegularMove(kingPos, Position.of(2, 3)));
 
     assertEquals("test king moves\n", kingExpectedMoves, kingMoves);
   }

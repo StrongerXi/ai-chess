@@ -13,6 +13,11 @@ To run the application and see user instructions:
 ./run --help
 ```
 
+To obtain a stand-alone jar file at `./target/chess.jar`:
+```
+./distro
+```
+
 ## Resources
 __General Ideas__:
 - [efficient legal move generation](https://peterellisjones.com/posts/generating-legal-chess-moves-efficiently/)

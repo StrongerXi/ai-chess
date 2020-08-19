@@ -48,8 +48,8 @@ public class ChessGameModelTest {
     for (int col = 0; col < 8; col += 1) {
       var actualMoves = game.getAllMovesFrom(1, col);
       var expectMoves = new HashSet<Position>();
-      expectMoves.add(new Position(2, col));
-      expectMoves.add(new Position(3, col));
+      expectMoves.add(Position.of(2, col));
+      expectMoves.add(Position.of(3, col));
       assertEquals("Check bottom pawn moves at column " + col, expectMoves, new HashSet<>(actualMoves));
       assertEquals("Check duplicates in bottom pawn move at column " + col, expectMoves.size(), actualMoves.size());
     }
@@ -63,8 +63,8 @@ public class ChessGameModelTest {
 
       } else {
         var expectMoves = new HashSet<Position>();
-        expectMoves.add(new Position(2, col - 1));
-        expectMoves.add(new Position(2, col + 1));
+        expectMoves.add(Position.of(2, col - 1));
+        expectMoves.add(Position.of(2, col + 1));
         assertEquals("Check bottom knight moves at column " + col, expectMoves, new HashSet<>(actualMoves));
         assertEquals("Check duplicates in bottom knight move at column " + col, expectMoves.size(), actualMoves.size());
       }
@@ -95,15 +95,15 @@ public class ChessGameModelTest {
     var botQueen = Optional.of(PieceFactory.makePiece(PieceType.QUEEN, PlayerType.BOTTOM_PLAYER));
     var botPawn = Optional.of(PieceFactory.makePiece(PieceType.PAWN, PlayerType.BOTTOM_PLAYER));
 
-    var topKingPos   = new Position(4, 4);
-    var topPawnPos   = new Position(4, 1);
-    var topKnightPos = new Position(3, 4);
-    var topBishopPos = new Position(2, 1);
+    var topKingPos   = Position.of(4, 4);
+    var topPawnPos   = Position.of(4, 1);
+    var topKnightPos = Position.of(3, 4);
+    var topBishopPos = Position.of(2, 1);
 
-    var botKingPos   = new Position(1, 2);
-    var botCastlePos = new Position(2, 3);
-    var botQueenPos  = new Position(3, 2);
-    var botPawnPos   = new Position(3, 0);
+    var botKingPos   = Position.of(1, 2);
+    var botCastlePos = Position.of(2, 3);
+    var botQueenPos  = Position.of(3, 2);
+    var botPawnPos   = Position.of(3, 0);
 
     board.setPieceAt(4, 4, topKing);
     board.setPieceAt(4, 1, topPawn);
@@ -124,9 +124,9 @@ public class ChessGameModelTest {
 
     // bottom king needs to escape/capture bishop, and watch out for knight
     var botKingExpectMoves = new HashSet<Position>();
-    botKingExpectMoves.add(new Position(0, 1));
-    botKingExpectMoves.add(new Position(0, 2));
-    botKingExpectMoves.add(new Position(1, 1));
+    botKingExpectMoves.add(Position.of(0, 1));
+    botKingExpectMoves.add(Position.of(0, 2));
+    botKingExpectMoves.add(Position.of(1, 1));
     botKingExpectMoves.add(topBishopPos);
     var botKingActualMoves = game.getAllMovesFrom(1, 2);
     assertEquals("check bottom king moves", botKingExpectMoves, new HashSet<>(botKingActualMoves));
@@ -182,14 +182,14 @@ public class ChessGameModelTest {
     var botQueen = Optional.of(PieceFactory.makePiece(PieceType.QUEEN, PlayerType.BOTTOM_PLAYER));
     var botKnight = Optional.of(PieceFactory.makePiece(PieceType.KNIGHT, PlayerType.BOTTOM_PLAYER));
 
-    var topKingPos   = new Position(5, 3);
-    var topQueenPos  = new Position(1, 4);
-    var topBishopPos = new Position(4, 1);
+    var topKingPos   = Position.of(5, 3);
+    var topQueenPos  = Position.of(1, 4);
+    var topBishopPos = Position.of(4, 1);
 
-    var botQueenPos  = new Position(0, 2);
-    var botKingPos   = new Position(0, 3);
-    var botBishopPos = new Position(0, 4);
-    var botKnightPos = new Position(0, 5);
+    var botQueenPos  = Position.of(0, 2);
+    var botKingPos   = Position.of(0, 3);
+    var botBishopPos = Position.of(0, 4);
+    var botKnightPos = Position.of(0, 5);
 
     board.setPieceAt(5, 3, topKing);
     board.setPieceAt(1, 4, topQueen);
