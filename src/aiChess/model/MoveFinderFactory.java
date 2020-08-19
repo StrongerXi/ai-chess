@@ -38,6 +38,11 @@ public final class MoveFinderFactory {
     }
   }
 
+  // Using Integer.(MAX/MIN)_VALUE isn't computation friendly
+  // This must be larger than any possible return value of `evaluateBoard`
+  private static final int MAX_SCORE = 1000000;
+  private static final int MIN_SCORE = -MAX_SCORE;
+
   /**
    * MoveFinder based on the naive minimax search algorithm.
    */
@@ -60,7 +65,7 @@ public final class MoveFinderFactory {
 
       // find the move with best score
       Move bestMove = null;
-      var bestScore = Integer.MIN_VALUE;
+      var bestScore = MIN_SCORE;
       var opponent = flipPlayer(player);
 
       // do 1 step expansion here, since `minimax` returns score only.
@@ -85,7 +90,7 @@ public final class MoveFinderFactory {
      */
     private int minimax(BoardModel board, int remainDepth, PlayerType currentPlayer) {
       boolean maximizer = (currentPlayer == this.player);
-      var score = maximizer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+      var score = maximizer ? MIN_SCORE : MAX_SCORE;
       var legalMoves = board.getAllLegalMoves(currentPlayer);
       var nextPlayer = flipPlayer(currentPlayer);
       if (legalMoves.isEmpty()) { // checkmate
@@ -133,7 +138,7 @@ public final class MoveFinderFactory {
 
       // find the move with best score
       Move bestMove = null;
-      var bestScore = Integer.MIN_VALUE;
+      var bestScore = MIN_SCORE;
       var opponent = flipPlayer(player);
 
       this.cacheHits.clear();
@@ -142,8 +147,8 @@ public final class MoveFinderFactory {
       // do 1 step expansion here, since `alphabeta` returns score only.
       for (var move : legalMoves) {
         move.apply(board);
-        var score = this.alphabeta(board, this.initialDepth - 1, bestScore, Integer.MAX_VALUE, opponent);
         System.out.printf("score = %d, bestScore = %d, move = %s, cache size = %d\n", 
+        var score = this.alphabeta(board, this.initialDepth - 1, bestScore, MAX_SCORE, opponent);
             score, bestScore, move, this.cache.size());
         if (bestMove == null || score > bestScore) { // must be `>`
           bestMove = move;
@@ -178,7 +183,7 @@ public final class MoveFinderFactory {
     private int alphabeta(BoardModel board, int remainDepth, int lower, int upper, PlayerType currentPlayer) {
       this.explored += 1;
       boolean maximizer = (currentPlayer == this.player);
-      var score = maximizer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+      var score = maximizer ? MIN_SCORE : MAX_SCORE;
       // check cache
       var entryOpt = this.cache.get(board, currentPlayer);
       if (entryOpt.isPresent() && entryOpt.get().depth >= remainDepth) {
@@ -207,6 +212,7 @@ public final class MoveFinderFactory {
         this.cache.put(board.getCopy(), currentPlayer, score, 0, EntryType.EXACT);
         return score;
       }
+      final int originalLower = lower, originalUpper = upper;
       // maximizer keeps pushing up lower bound, and opposite for minimizer.
       for (var move : legalMoves) {
         move.apply(board);
@@ -229,9 +235,9 @@ public final class MoveFinderFactory {
       }
       // store result in cache
       EntryType type = EntryType.EXACT;
-      if (score <= lower) {
+      if (score <= originalLower) {
         type = EntryType.UPPER;
-      } else if (score >= upper) {
+      } else if (score >= originalUpper) {
         type = EntryType.LOWER;
       }
       this.cache.put(board.getCopy(), currentPlayer, score, remainDepth, type);
