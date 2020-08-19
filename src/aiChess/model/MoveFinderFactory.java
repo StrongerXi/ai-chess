@@ -11,7 +11,7 @@ import java.util.TreeMap;
 public final class MoveFinderFactory {
 
   public enum MoveFinderType {
-    MINIMAX, ALPHA_BETA
+    MINIMAX, ALPHA_BETA, MTDF
   }
 
   /* Prevent instantiation */
@@ -33,6 +33,7 @@ public final class MoveFinderFactory {
     switch (type) {
       case MINIMAX:    return new Minimax(depth, player);
       case ALPHA_BETA: return new AlphaBeta(depth, player);
+      case MTDF:       return new IterativeMtdf(depth, player);
       default:
         throw new RuntimeException("Unsupported MoveFinderType: " + type.toString());
     }
@@ -272,6 +273,82 @@ public final class MoveFinderFactory {
         type = EntryType.LOWER;
       }
       this.cache.put(board.getCopy(), currentPlayer, score, remainDepth, type);
+      return score;
+    }
+  }
+
+  private static final class IterativeMtdf implements MoveFinder {
+    private final int maxDepth;
+    private final AlphaBeta abFinder;
+    /**
+     * Constructor.
+     */
+    IterativeMtdf(int maxDepth, PlayerType player) {
+      this.maxDepth = maxDepth;
+      // `maxDepth` is technically never used in `abFinder`
+      this.abFinder = new AlphaBeta(maxDepth, player);
+    }
+
+    @Override
+    public Move getBestMove(ChessGameModel model) {
+      var player = model.getCurrentPlayer();
+      var board = model.getBoardCopy();
+      var legalMoves = board.getAllLegalMoves(player);
+      assert(!legalMoves.isEmpty());
+
+      // find the move with best score
+      Move bestMove = null;
+      var bestScore = MIN_SCORE;
+      var opponent = flipPlayer(player);
+
+      this.abFinder.cacheHits.clear();
+      this.abFinder.explored = 0;
+      var start = System.nanoTime(); // profiling
+      // do 1 step expansion here, since `alphabeta` returns score only.
+      for (var move : legalMoves) {
+        move.apply(board);
+        var score = this.mtdf(board, bestScore, this.maxDepth - 1, opponent);
+        System.out.printf("score = %d, bestScore = %d, move = %s, cache size = %d\n",
+            score, bestScore, move, this.abFinder.cache.size());
+        if (bestMove == null || score > bestScore) { // must be `>`
+          bestMove = move;
+          bestScore = score;
+        }
+        move.undo(board);
+      }
+      this.abFinder.cache.clear(); // most entries won't be re-usable
+      var end = System.nanoTime();
+      System.out.printf("Took %.3fs, nodes explored = %d, expanded = %d\n",
+          (end - start) / 1e9, this.abFinder.explored, this.abFinder.expanded);
+      for (var entry : this.abFinder.cacheHits.entrySet()) {
+        var depth = entry.getKey();
+        var hits  = entry.getValue();
+        System.out.printf("At depth %d, cache hits = %d\n", depth, hits);
+      }
+      return bestMove;
+    }
+
+    private int mtdf(BoardModel board, int bestScore, int initDepth, PlayerType initPlayer) {
+      int score;
+      int scoreUpper = MAX_SCORE;
+      int scoreLower = bestScore;
+      int count = 0;
+      do {
+        //int oldExplored = this.abFinder.explored;
+        int windowUpper = Math.floorDiv(scoreUpper + scoreLower, 2) + 1;
+        score = this.abFinder.alphabeta(board, initDepth, windowUpper - 1, windowUpper, initPlayer);
+        if (score < windowUpper) {
+          scoreUpper = score;
+        } else {
+          scoreLower = score;
+        }
+        count += 1;
+        //int explored = this.abFinder.explored - oldExplored;
+        //System.out.printf("[mtdf] explored %d nodes in 1 iteration, lower = %d, upper = %d, window = %d\n",
+        //    explored, scoreLower, scoreUpper, windowUpper);
+        //this.abFinder.cache.clear();
+      } while (scoreLower < scoreUpper);
+      //System.out.printf("[mtdf] %d iterations.\n", count);
       return score;
     }
   }
