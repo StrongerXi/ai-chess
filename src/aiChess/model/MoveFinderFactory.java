@@ -50,6 +50,7 @@ public final class MoveFinderFactory {
     private final int depth;
     private final PlayerType player; // evaluate for this player specifically
     private int explored;
+    private final TranspositionTable cache = new TranspositionTable();
     /**
      * Constructor.
      */
@@ -82,6 +83,7 @@ public final class MoveFinderFactory {
         }
         move.undo(board);
       }
+      this.cache.clear(); // most entries won't be re-usable
       var end = System.nanoTime();
       System.out.printf("Took %.3fs, nodes explored = %d, expanded = %d\n",
           (end - start) / 1e9, explored);
@@ -96,6 +98,11 @@ public final class MoveFinderFactory {
      */
     private int minimax(BoardModel board, int remainDepth, PlayerType currentPlayer) {
       boolean maximizer = (currentPlayer == this.player);
+      var entryOpt = this.cache.get(board, currentPlayer);
+      if (entryOpt.isPresent() && entryOpt.get().depth >= remainDepth) {
+        assert(entryOpt.get().type == EntryType.EXACT);
+        return entryOpt.get().score;
+      }
       var score = maximizer ? MIN_SCORE : MAX_SCORE;
       var legalMoves = board.getAllLegalMoves(currentPlayer);
       var nextPlayer = flipPlayer(currentPlayer);
@@ -104,16 +111,18 @@ public final class MoveFinderFactory {
       }
       if (remainDepth == 0) {
         legalMoves.addAll(board.getAllLegalMoves(nextPlayer));
-        return evaluateBoard(board, this.player, legalMoves);
+        score = evaluateBoard(board, this.player, legalMoves);
+      } else {
+        for (var move : board.getAllLegalMoves(currentPlayer)) {
+          move.apply(board);
+          var newScore = this.minimax(board, remainDepth - 1, nextPlayer);
+          score = maximizer ?
+            Integer.max(score, newScore) :
+            Integer.min(score, newScore);
+          move.undo(board);
+        }
       }
-      for (var move : board.getAllLegalMoves(currentPlayer)) {
-        move.apply(board);
-        var newScore = this.minimax(board, remainDepth - 1, nextPlayer);
-        score = maximizer ?
-                Integer.max(score, newScore) :
-                Integer.min(score, newScore);
-        move.undo(board);
-      }
+      this.cache.put(board.getCopy(), currentPlayer, score, remainDepth, EntryType.EXACT);
       return score;
     }
   }
@@ -222,6 +231,7 @@ public final class MoveFinderFactory {
         this.cache.put(board.getCopy(), currentPlayer, score, 0, EntryType.EXACT);
         return score;
       }
+      this.expanded += 1;
       final int originalLower = lower, originalUpper = upper;
       // maximizer keeps pushing up lower bound, and opposite for minimizer.
       for (var move : legalMoves) {
