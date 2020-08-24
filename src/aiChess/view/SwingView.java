@@ -8,7 +8,6 @@ import java.awt.Insets;
 
 import javax.swing.border.EmptyBorder;
 
-import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import javax.swing.*;
 import javax.imageio.ImageIO;
@@ -24,6 +23,7 @@ import aiChess.model.Piece;
 import aiChess.model.PlayerType;
 import aiChess.model.Position;
 import aiChess.model.ChessGameModel;
+import aiChess.view.ChessViewListener.PlayerAgent;
 
 
 public class SwingView implements ChessView {
@@ -70,6 +70,41 @@ public class SwingView implements ChessView {
     REACHABLE,  // Empty tile that can be reached by the selected piece
     NORMAL,     // A normal tile, either occupied or empty
     SELECTED    // The currently selected tile (should be occupied)
+  }
+
+  // UI panel for interactions unrelated to board
+  private class UIPanel extends JPanel{
+
+    private final String[] options = new String[]{ "human", "easy-ai", "medium-ai", "hard-ai" };
+    private final PlayerAgent[] agents = new PlayerAgent[]{
+      PlayerAgent.HUMAN, PlayerAgent.EASY_COMPUTER, PlayerAgent.MEDIUM_COMPUTER, PlayerAgent.HARD_COMPUTER };
+    private final JComboBox<String> topBox = new JComboBox<>(options);
+    private final JComboBox<String> botBox = new JComboBox<>(options);
+
+    UIPanel() {
+      super();
+      this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+      var topPanel = this.createPlayerPanel(PlayerType.TOP_PLAYER, topBox);
+      var botPanel = this.createPlayerPanel(PlayerType.BOTTOM_PLAYER, botBox);
+      this.add(topPanel);
+      this.add(botPanel);
+    }
+
+    // create a row panel for selecting
+    private JPanel createPlayerPanel(PlayerType player, JComboBox<String> agentOpts) {
+      var panel = new JPanel(new GridLayout());
+      var changeButton = new JButton("change");
+      changeButton.addActionListener(e -> {
+        var index = agentOpts.getSelectedIndex();
+        var agent = this.agents[index];
+        SwingView.this.listener.ifPresent(l -> l.setPlayerAgentRequested(player, agent));
+      });
+      panel.add(agentOpts);
+      panel.add(changeButton);
+      var title = (player == PlayerType.TOP_PLAYER) ? "top" : "bottom";
+      panel.setBorder(BorderFactory.createTitledBorder(title));
+      return panel;
+    }
   }
 
   private JFrame window;
@@ -155,9 +190,11 @@ public class SwingView implements ChessView {
       var mainPanel = new JPanel(new BorderLayout());
       var toolbar = initToolBar.get();
       var boardPanel = initBoardPanel.get();
+      var uiPanel = new UIPanel();
 
       mainPanel.add(toolbar, BorderLayout.NORTH);
       mainPanel.add(boardPanel, BorderLayout.CENTER);
+      mainPanel.add(uiPanel, BorderLayout.EAST);
 
       this.window = new JFrame("Chess");
       window.add(mainPanel);
