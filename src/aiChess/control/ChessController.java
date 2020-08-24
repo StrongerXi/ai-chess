@@ -157,25 +157,27 @@ public class ChessController implements ChessViewListener {
   // Interpretation of `PlayerAgent` lies here, especially for different levels
   // of computer agents.
   public void setPlayerAgentRequested(PlayerType player, PlayerAgent agent) {
-    PlayerController controller = new UserController(); // default to human
-    if (agent != PlayerAgent.HUMAN) {
-      MoveFinder finder;
-      switch (agent) {
-        case EASY_COMPUTER: {
-          finder = MoveFinderFactory.makeMoveFinder(MoveFinderType.MINIMAX, 2, player);
-          break;
+    synchronized (lock) {
+      PlayerController controller = new UserController(); // default to human
+      if (agent != PlayerAgent.HUMAN) {
+        MoveFinder finder;
+        switch (agent) {
+          case EASY_COMPUTER: {
+            finder = MoveFinderFactory.makeMoveFinder(MoveFinderType.MINIMAX, 2, player);
+            break;
+          }
+          case MEDIUM_COMPUTER: {
+            finder = MoveFinderFactory.makeMoveFinder(MoveFinderType.ALPHA_BETA, 3, player);
+            break;
+          }
+          default: { // HARD_COMPUTER
+            finder = MoveFinderFactory.makeMoveFinder(MoveFinderType.MTDF, 4, player);
+          }
         }
-        case MEDIUM_COMPUTER: {
-          finder = MoveFinderFactory.makeMoveFinder(MoveFinderType.ALPHA_BETA, 3, player);
-          break;
-        }
-        default: { // HARD_COMPUTER
-          finder = MoveFinderFactory.makeMoveFinder(MoveFinderType.MTDF, 4, player);
-        }
+        controller = new AIController(finder, this.model, this.view);
       }
-      controller = new AIController(finder, this.model, this.view);
+      this.controllerMap.put(player, controller);
     }
-    this.controllerMap.put(player, controller);
   }
 
   /**
