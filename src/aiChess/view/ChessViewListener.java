@@ -1,9 +1,24 @@
 package aiChess.view;
+import aiChess.model.PlayerType;
 
 /**
  * A callback interface used to handle user input received within the ChessView.
  */
 public interface ChessViewListener {
+
+  /**
+   * The agent that controls a (top/bottom) player.
+   */
+  enum PlayerAgent {
+    HUMAN, EASY_COMPUTER, MEDIUM_COMPUTER, HARD_COMPUTER
+  }
+
+  /**
+   * Make appropriate response to user's request to use `agent` for
+   * controlling `player`.
+   */
+  void setPlayerAgentRequested(PlayerType player, PlayerAgent agent);
+
   
   /**
    * Make appropriate response when the user has requested to make a move
