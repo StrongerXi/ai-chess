@@ -84,11 +84,9 @@ public class ChessController implements ChessViewListener {
     this.view = view;
     var defaultFinder =
       MoveFinderFactory.makeMoveFinder(MoveFinderType.MTDF, 4, PlayerType.TOP_PLAYER);
-    var userControl = new UserController();
-    var aiControl   = new AIController(defaultFinder, this.model, this.view);
-    // default user vs computer
-    this.controllerMap.put(PlayerType.TOP_PLAYER, aiControl);
-    this.controllerMap.put(PlayerType.BOTTOM_PLAYER, userControl);
+    // default user vs user
+    this.controllerMap.put(PlayerType.TOP_PLAYER, new UserController());
+    this.controllerMap.put(PlayerType.BOTTOM_PLAYER, new UserController());
   }
 
   /**
