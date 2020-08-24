@@ -22,10 +22,48 @@ import java.util.HashMap;
 public class ChessController implements ChessViewListener {
 
   /**
-   * Who is controlling the action of a player.
+   * Who/What is controlling the action of a player. Essentially a closure.
+   * ASSUME synchronization is taken care of before using this closure.
    */
-  public static enum PlayerController {
-    USER, AI
+  private static interface PlayerController {
+    /**
+     * Make 1 move.
+     */
+    void makeMove();
+  }
+
+  // Controlled by user via UI
+  private final class UserController implements PlayerController {
+    public void makeMove() {
+      // wait until the play is completed via view UI
+      while(!ChessController.this.playerActed) { // prevent spurious wakeup
+        try {
+          ChessController.this.lock.wait();
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+      ChessController.this.playerActed = false;
+    }
+  }
+
+  // Controlled by computer (i.e. MoveFinder)
+  private final static class AIController implements PlayerController {
+    private final MoveFinder finder;
+    private final ChessGameModel model;
+    private final ChessView view;
+    AIController(MoveFinder finder, ChessGameModel model, ChessView view) {
+      this.finder = finder;
+      this.model = model;
+      this.view = view;
+    }
+    public void makeMove() {
+      var move = this.finder.getBestMove(this.model);
+      var src = move.sourcePos;
+      var dst = move.targetPos;
+      this.model.makeMove(src.row, src.col, dst.row, dst.col);
+      this.view.refresh(); // this move bypassed view, manually sync it.
+    }
   }
 
   private final ChessGameModel model;
@@ -43,14 +81,13 @@ public class ChessController implements ChessViewListener {
     Objects.requireNonNull(view, "view is null\n");
     this.model = model;
     this.view = view;
-    // default finders
-    var topFinder = MoveFinderFactory.makeMoveFinder(MoveFinderType.MTDF, 5, PlayerType.TOP_PLAYER);
-    var botFinder = MoveFinderFactory.makeMoveFinder(MoveFinderType.ALPHA_BETA, 5, PlayerType.BOTTOM_PLAYER);
-    this.moveFinderMap.put(PlayerType.TOP_PLAYER, topFinder);
-    this.moveFinderMap.put(PlayerType.BOTTOM_PLAYER, botFinder);
+    var defaultFinder =
+      MoveFinderFactory.makeMoveFinder(MoveFinderType.MTDF, 4, PlayerType.TOP_PLAYER);
+    var userControl = new UserController();
+    var aiControl   = new AIController(defaultFinder, this.model, this.view);
     // default user vs computer
-    this.controllerMap.put(PlayerType.TOP_PLAYER, PlayerController.AI);
-    this.controllerMap.put(PlayerType.BOTTOM_PLAYER, PlayerController.USER);
+    this.controllerMap.put(PlayerType.TOP_PLAYER, aiControl);
+    this.controllerMap.put(PlayerType.BOTTOM_PLAYER, userControl);
   }
 
   /**
@@ -86,22 +123,6 @@ public class ChessController implements ChessViewListener {
     }
   }
 
-  /**
-   * Set controller for `player` to AI, with given type of MoveFinder and search depth.
-   */
-  public void setAIController(PlayerType player, MoveFinderType type, int depth) {
-    var finder = MoveFinderFactory.makeMoveFinder(MoveFinderType.MINIMAX, 3, player);
-    this.controllerMap.put(player, PlayerController.AI);
-    this.moveFinderMap.put(player, finder);
-  }
-
-  /**
-   * Set controller for `player` to human user which makes move via View UI.
-   */
-  public void setUserController(PlayerType player) {
-    this.controllerMap.put(player, PlayerController.USER);
-  }
-
   // User uses View to select and request a move
   // But AI player can't. To support an execution model (simplified):
   // - player1.takeTurn()
@@ -126,30 +147,8 @@ public class ChessController implements ChessViewListener {
    */
   private boolean takeTurn(PlayerType player) {
     var control = this.controllerMap.get(player);
-    // TODO anti-OOD, but the logic is simple enough to be pragmatic for now.
     synchronized (lock) {
-      switch (control) {
-        case AI: {
-          var finder = this.moveFinderMap.get(player);
-          var move = finder.getBestMove(this.model);
-          var src = move.sourcePos;
-          var dst = move.targetPos;
-          this.model.makeMove(src.row, src.col, dst.row, dst.col);
-          this.view.refresh(); // this move bypassed view, manually sync it.
-          break;
-        }
-        case USER: {
-          // wait until one of the *Requested methods signals.
-          while(!this.playerActed) { // prevent spurious wakeup
-            try {
-              lock.wait();
-            } catch (InterruptedException e) {
-              e.printStackTrace();
-            }
-          }
-          this.playerActed = false;
-        }
-      }
+      control.makeMove();
     }
     return this.model.isGameOver();
   }
@@ -186,9 +185,9 @@ public class ChessController implements ChessViewListener {
                         PlayerType.BOTTOM_PLAYER : PlayerType.TOP_PLAYER;
         // Since AI algorithms are currently (and likely in future) deterministic,
         // we don't support undo when both players are controlled by computers
-        if (this.controllerMap.get(opponent) == PlayerController.USER) {
+        if (this.controllerMap.get(opponent) instanceof UserController) {
           this.model.undoLastMove(); // undo player move
-        } else if (this.controllerMap.get(player) == PlayerController.USER) {
+        } else if (this.controllerMap.get(player) instanceof UserController) {
           this.model.undoLastMove(); // undo computer move
           this.model.undoLastMove(); // undo player move
         }
