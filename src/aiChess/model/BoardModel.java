@@ -88,6 +88,11 @@ final class BoardModel {
     this.board[row][col] = replacement.isPresent() ? replacement.get() : null;
   }
 
+  // For testing convenience
+  void setPieceAt(Position pos, Optional<Piece> replacement) {
+    this.setPieceAt(pos.row, pos.col, replacement);
+  }
+
   /**
    * Return all the legal moves for `player`.
    */
