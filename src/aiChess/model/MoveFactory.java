@@ -40,7 +40,7 @@ final class MoveFactory {
      * Constructor.
      */
     public RegularMove(Position sourcePos, Position targetPos) {
-      super(sourcePos, targetPos);
+      super(sourcePos, targetPos, Move.MoveType.REGULAR);
     }
 
     @Override
@@ -61,24 +61,6 @@ final class MoveFactory {
       sourcePiece = Optional.empty();
       targetPiece = Optional.empty();
     }
-
-
-    /* NOTE move equality only concerns source and target position 
-     * not internal state of move. */
-
-    @Override
-    public boolean equals(Object o) {
-      if (o == null || !(o instanceof RegularMove)) return false;
-      if (o == this) return true;
-      RegularMove other = (RegularMove) o;
-      return this.sourcePos.equals(other.sourcePos)
-          && this.targetPos.equals(other.targetPos);
-    }
-
-    @Override
-    public int hashCode() {
-      return (31 * this.sourcePos.hashCode()) * 31 + this.targetPos.hashCode();
-    }
   }
 
   /**
@@ -90,7 +72,7 @@ final class MoveFactory {
      * source and target positions in Move are interpreted for King here.
      */
     public Castling(Position kingSrc, Position kingDst) {
-      super(kingSrc, kingDst);
+      super(kingSrc, kingDst, Move.MoveType.CASTLING);
       assert(kingSrc.row == kingDst.row);
     }
 
@@ -124,24 +106,6 @@ final class MoveFactory {
       model.setPieceAt(sourcePos.row, sourcePos.col, king.map(p -> p.setMoved(false)));
       model.setPieceAt(targetPos.row, targetPos.col, Optional.empty());
     }
-
-
-    /* NOTE move equality only concerns source and target position
-     * not internal state of move. */
-
-    @Override
-    public boolean equals(Object o) {
-      if (o == null || !(o instanceof Castling)) return false;
-      if (o == this) return true;
-      Castling other = (Castling) o;
-      return this.sourcePos.equals(other.sourcePos)
-          && this.targetPos.equals(other.targetPos);
-    }
-
-    @Override
-    public int hashCode() {
-      return (31 * this.sourcePos.hashCode()) * 31 + this.targetPos.hashCode();
-    }
   }
 
   /**
@@ -156,7 +120,7 @@ final class MoveFactory {
      * Constructor.
      */
     public PawnPromotion(Position sourcePos, Position targetPos) {
-      super(sourcePos, targetPos);
+      super(sourcePos, targetPos, Move.MoveType.PAWN_PROMOTION);
     }
 
     @Override
@@ -176,23 +140,6 @@ final class MoveFactory {
       model.setPieceAt(sourcePos.row, sourcePos.col, this.pawnPiece);
       this.pawnPiece = Optional.empty();
       this.targetPiece = Optional.empty();
-    }
-
-    /* NOTE move equality only concerns source and target position
-     * not internal state of move. */
-
-    @Override
-    public boolean equals(Object o) {
-      if (o == null || !(o instanceof PawnPromotion)) return false;
-      if (o == this) return true;
-      PawnPromotion other = (PawnPromotion) o;
-      return this.sourcePos.equals(other.sourcePos)
-          && this.targetPos.equals(other.targetPos);
-    }
-
-    @Override
-    public int hashCode() {
-      return (31 * this.sourcePos.hashCode()) * 31 + this.targetPos.hashCode();
     }
   }
 }

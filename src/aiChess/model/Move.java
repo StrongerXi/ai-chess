@@ -1,5 +1,6 @@
 package aiChess.model;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -10,17 +11,24 @@ import java.util.Optional;
  */
 public abstract class Move {
 
+  // Used to identify the type of a Move
+  public enum MoveType {
+    REGULAR, CASTLING, PAWN_PROMOTION
+  }
+
   /* read only attributes */
   public final Position sourcePos;
   public final Position targetPos;
+  public final MoveType type;
 
   
   /**
    * Constructor.
    */
-  public Move(Position sourcePos, Position targetPos) {
+  public Move(Position sourcePos, Position targetPos, MoveType type) {
     this.sourcePos = sourcePos;
     this.targetPos = targetPos;
+    this.type = type;
   }
 
 
@@ -40,6 +48,24 @@ public abstract class Move {
 
   @Override
   public String toString() {
-    return String.format("%s to %s", sourcePos, targetPos);
+    return String.format("[%s] %s to %s", type.toString(), sourcePos, targetPos);
+  }
+
+  /* NOTE move equality only concerns source and target position
+   * not internal state of move. */
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || !(o instanceof Move)) return false;
+    if (o == this) return true;
+    var other = (Move) o;
+    return this.sourcePos.equals(other.sourcePos) &&
+           this.targetPos.equals(other.targetPos) &&
+           this.type == other.type;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(this.sourcePos, this.targetPos);
   }
 }
