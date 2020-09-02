@@ -34,7 +34,7 @@ public class MoveFactoryTest {
     // _ _ 
     var pos11 = Position.of(1, 1); 
     var king = Optional.of(PieceFactory.makePiece(PieceType.KING, PlayerType.TOP_PLAYER));
-    var kingMoved = Optional.of(PieceFactory.makePieceMoved(PieceType.KING, PlayerType.TOP_PLAYER, true));
+    var kingMoved = Optional.of(PieceFactory.makePiece(PieceType.KING, PlayerType.TOP_PLAYER).setMoved(true));
     var move = MoveFactory.makeRegularMove(pos11, pos11);
     this.board.setPieceAt(1, 1, king);
 
@@ -93,10 +93,10 @@ public class MoveFactoryTest {
     Piece topCastle = PieceFactory.makePiece(PieceType.CASTLE, PlayerType.TOP_PLAYER);
     Piece topKnight = PieceFactory.makePiece(PieceType.KNIGHT, PlayerType.TOP_PLAYER);
 
-    Piece bottomPawnMoved = PieceFactory.makePieceMoved(PieceType.PAWN, PlayerType.BOTTOM_PLAYER, true);
-    Piece topBishopMoved = PieceFactory.makePieceMoved(PieceType.BISHOP, PlayerType.TOP_PLAYER, true);
-    Piece topCastleMoved = PieceFactory.makePieceMoved(PieceType.CASTLE, PlayerType.TOP_PLAYER, true);
-    Piece topKnightMoved = PieceFactory.makePieceMoved(PieceType.KNIGHT, PlayerType.TOP_PLAYER, true);
+    Piece bottomPawnMoved = PieceFactory.makePiece(PieceType.PAWN, PlayerType.BOTTOM_PLAYER).setMoved(true);
+    Piece topBishopMoved = PieceFactory.makePiece(PieceType.BISHOP, PlayerType.TOP_PLAYER).setMoved(true);
+    Piece topCastleMoved = PieceFactory.makePiece(PieceType.CASTLE, PlayerType.TOP_PLAYER).setMoved(true);
+    Piece topKnightMoved = PieceFactory.makePiece(PieceType.KNIGHT, PlayerType.TOP_PLAYER).setMoved(true);
 
     this.board.setPieceAt(1, 1, Optional.of(bottomPawn));
     this.board.setPieceAt(2, 2, Optional.of(topBishop));
