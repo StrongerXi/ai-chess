@@ -94,8 +94,7 @@ final class PieceFactory {
           }
           // make sure king and those empty positions are not under attack
           safePos.add(kingPos);
-          var opponent = (this.owner == PlayerType.TOP_PLAYER) ?
-                          PlayerType.BOTTOM_PLAYER : PlayerType.TOP_PLAYER;
+          var opponent = this.owner.getOpponent();
           if (allEmpty && anyUnderAttack(safePos, board, opponent)) {
             moves.add(MoveFactory.makeCastling(kingPos, Position.of(row, castleCol - colDelta)));
           }

@@ -93,8 +93,7 @@ final class BoardModel {
    */
   public Collection<Move> getAllLegalMoves(PlayerType player) {
     var legalMoves = new ArrayList<Move>();
-    var opponent = (player == PlayerType.TOP_PLAYER) ?
-                   PlayerType.BOTTOM_PLAYER : PlayerType.TOP_PLAYER;
+    var opponent = player.getOpponent();
     // locate king and collect positions of opponent pieces
     var opponentPositions = new ArrayList<Position>();
     Position kingPosHolder = null;
@@ -149,8 +148,7 @@ final class BoardModel {
     if (dstPiece != null && dstPiece.type == PieceType.KING) {
       return true;
     }
-    var opponent = (srcPiece.owner == PlayerType.TOP_PLAYER) ?
-                   PlayerType.BOTTOM_PLAYER : PlayerType.TOP_PLAYER;
+    var opponent = srcPiece.owner.getOpponent();
     // no opponent piece should threaten king after the move
     move.apply(this);
     for (var pos : opponentPositions) {

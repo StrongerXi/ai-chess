@@ -18,14 +18,6 @@ public final class MoveFinderFactory {
   private MoveFinderFactory() {}
 
   /**
-   * Return the other player.
-   */
-  static PlayerType flipPlayer(PlayerType player) {
-    return (player == PlayerType.TOP_PLAYER) ?
-            PlayerType.BOTTOM_PLAYER : PlayerType.TOP_PLAYER;
-  }
-
-  /**
    * Generate a MoveFinder instance for `player`, based on `type`, with `depth` being
    * maximum search depth.
    */
@@ -72,7 +64,7 @@ public final class MoveFinderFactory {
       // find the move with best score
       Move bestMove = null;
       var bestScore = MIN_SCORE;
-      var opponent = flipPlayer(player);
+      var opponent = player.getOpponent();
 
       this.cacheHits.clear();
       this.explored = 0;
@@ -119,7 +111,7 @@ public final class MoveFinderFactory {
       }
       var score = maximizer ? MIN_SCORE : MAX_SCORE;
       var legalMoves = board.getAllLegalMoves(currentPlayer);
-      var nextPlayer = flipPlayer(currentPlayer);
+      var nextPlayer = currentPlayer.getOpponent();
       if (legalMoves.isEmpty()) { // checkmate
         return score;
       }
@@ -170,7 +162,7 @@ public final class MoveFinderFactory {
       // find the move with best score
       Move bestMove = null;
       var bestScore = MIN_SCORE;
-      var opponent = flipPlayer(player);
+      var opponent = player.getOpponent();
 
       this.cacheHits.clear();
       this.explored = 0;
@@ -235,7 +227,7 @@ public final class MoveFinderFactory {
         }
       }
       var legalMoves = board.getAllLegalMoves(currentPlayer);
-      var nextPlayer = flipPlayer(currentPlayer);
+      var nextPlayer = currentPlayer.getOpponent();
       if (legalMoves.isEmpty()) { // checkmate
         return score;
       }
@@ -301,7 +293,7 @@ public final class MoveFinderFactory {
       // find the move with best score
       Move bestMove = null;
       var bestScore = MIN_SCORE;
-      var opponent = flipPlayer(player);
+      var opponent = player.getOpponent();
 
       this.abFinder.cacheHits.clear();
       this.abFinder.explored = 0;
