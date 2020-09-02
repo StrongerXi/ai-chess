@@ -7,8 +7,6 @@ import java.util.Optional;
  * A factory which generates concrete moves representing:
  * - regular move
  * - EnPassant (TODO)
- * - Castling (TODO)
- * - Pawn promotion (TODO)
  */
 final class MoveFactory {
 

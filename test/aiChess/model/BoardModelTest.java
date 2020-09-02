@@ -57,7 +57,7 @@ public class BoardModelTest {
   }
 
   @Test
-  public void testGetAllLegalMoves1() {
+  public void testGetSetPieceAt() {
     // 1 _ _ B
     // 0 _ c _
     //   0 1 2
