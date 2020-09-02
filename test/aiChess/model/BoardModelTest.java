@@ -57,7 +57,7 @@ public class BoardModelTest {
   }
 
   @Test
-  public void testGetAllLegalMoves1() {
+  public void testGetSetPieceAt() {
     // 1 _ _ B
     // 0 _ c _
     //   0 1 2
@@ -97,10 +97,10 @@ public class BoardModelTest {
     var board = new BoardModel(3, 3);
     var topKing = Optional.of(PieceFactory.makePiece(PieceType.KING, PlayerType.TOP_PLAYER));
     var botKing = Optional.of(PieceFactory.makePiece(PieceType.KING, PlayerType.BOTTOM_PLAYER));
-    board.setPieceAt(2, 1, topKing);
-    board.setPieceAt(0, 1, botKing);
     var topKingPos = Position.of(2, 1);
     var botKingPos = Position.of(0, 1);
+    board.setPieceAt(topKingPos, topKing);
+    board.setPieceAt(botKingPos, botKing);
     var topLegalMoves = new HashSet<Move>();
     var botLegalMoves = new HashSet<Move>();
 
@@ -161,16 +161,16 @@ public class BoardModelTest {
     var botPawnPos   = Position.of(2, 3);
     var botKnightPos = Position.of(1, 3);
 
-    board.setPieceAt(5, 0, topKing);
-    board.setPieceAt(3, 4, topCastle);
-    board.setPieceAt(1, 0, topQueen);
-    board.setPieceAt(4, 1, topBishop);
+    board.setPieceAt(topKingPos, topKing);
+    board.setPieceAt(topCastlePos, topCastle);
+    board.setPieceAt(topQueenPos, topQueen);
+    board.setPieceAt(topBishopPos, topBishop);
 
-    board.setPieceAt(1, 4, botKing);
-    board.setPieceAt(0, 0, botCastle);
-    board.setPieceAt(5, 4, botQueen);
-    board.setPieceAt(2, 3, botPawn);
-    board.setPieceAt(1, 3, botKnight);
+    board.setPieceAt(botKingPos, botKing);
+    board.setPieceAt(botCastlePos, botCastle);
+    board.setPieceAt(botQueenPos, botQueen);
+    board.setPieceAt(botPawnPos, botPawn);
+    board.setPieceAt(botKnightPos, botKnight);
 
     var topLegalMoves = new HashSet<Move>();
     var botLegalMoves = new HashSet<Move>();
@@ -230,11 +230,11 @@ public class BoardModelTest {
     var topKingPos        = Position.of(5, 2);
     var botKingPos        = Position.of(0, 2);
 
-    board.setPieceAt(5, 2, topKing);
+    board.setPieceAt(topKingPos, topKing);
     board.setPieceAt(5, 0, topCastle);
     board.setPieceAt(5, 5, topCastle);
 
-    board.setPieceAt(0, 2, botKing);
+    board.setPieceAt(botKingPos, botKing);
     board.setPieceAt(0, 0, botCastle);
     board.setPieceAt(0, 5, botCastle);
     board.setPieceAt(1, 1, botQueen);
@@ -279,10 +279,10 @@ public class BoardModelTest {
     var botPawnPos = Position.of(4, 2);
 
     board.setPieceAt(5, 5, topKing);
-    board.setPieceAt(1, 1, topPawn);
+    board.setPieceAt(topPawnPos, topPawn);
     board.setPieceAt(1, 4, topBishop);
 
-    board.setPieceAt(4, 2, botPawn);
+    board.setPieceAt(botPawnPos, botPawn);
     board.setPieceAt(0, 3, botKing);
     board.setPieceAt(0, 0, botCastle);
     board.setPieceAt(0, 2, botQueen);

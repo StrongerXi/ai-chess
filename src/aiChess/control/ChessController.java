@@ -206,8 +206,7 @@ public class ChessController implements ChessViewListener {
     try {
       synchronized (lock) {
         var player = this.model.getCurrentPlayer();
-        var opponent = (player == PlayerType.TOP_PLAYER) ?
-                        PlayerType.BOTTOM_PLAYER : PlayerType.TOP_PLAYER;
+        var opponent = player.getOpponent();
         // Since AI algorithms are currently (and likely in future) deterministic,
         // we don't support undo when both players are controlled by computers
         if (this.controllerMap.get(opponent) instanceof UserController) {

@@ -105,15 +105,15 @@ public class ChessGameModelTest {
     var botQueenPos  = Position.of(3, 2);
     var botPawnPos   = Position.of(3, 0);
 
-    board.setPieceAt(4, 4, topKing);
-    board.setPieceAt(4, 1, topPawn);
-    board.setPieceAt(3, 4, topKnight);
-    board.setPieceAt(2, 1, topBishop);
+    board.setPieceAt(topKingPos, topKing);
+    board.setPieceAt(topPawnPos, topPawn);
+    board.setPieceAt(topKnightPos, topKnight);
+    board.setPieceAt(topBishopPos, topBishop);
 
-    board.setPieceAt(1, 2, botKing);
-    board.setPieceAt(2, 3, botCastle);
-    board.setPieceAt(3, 2, botQueen);
-    board.setPieceAt(3, 0, botPawn);
+    board.setPieceAt(botKingPos, botKing);
+    board.setPieceAt(botCastlePos, botCastle);
+    board.setPieceAt(botQueenPos, botQueen);
+    board.setPieceAt(botPawnPos, botPawn);
 
     var game = new ChessGameModel(board, PlayerType.BOTTOM_PLAYER);
     for (var pos : new Position[]{topKingPos, topPawnPos, topKnightPos, topBishopPos}) {
@@ -191,14 +191,14 @@ public class ChessGameModelTest {
     var botBishopPos = Position.of(0, 4);
     var botKnightPos = Position.of(0, 5);
 
-    board.setPieceAt(5, 3, topKing);
-    board.setPieceAt(1, 4, topQueen);
-    board.setPieceAt(4, 1, topBishop);
+    board.setPieceAt(topKingPos, topKing);
+    board.setPieceAt(topQueenPos, topQueen);
+    board.setPieceAt(topBishopPos, topBishop);
 
-    board.setPieceAt(0, 2, botQueen);
-    board.setPieceAt(0, 3, botKing);
-    board.setPieceAt(0, 4, botBishop);
-    board.setPieceAt(0, 5, botKnight);
+    board.setPieceAt(botQueenPos, botQueen);
+    board.setPieceAt(botKingPos, botKing);
+    board.setPieceAt(botBishopPos, botBishop);
+    board.setPieceAt(botKnightPos, botKnight);
 
     var game = new ChessGameModel(board, PlayerType.BOTTOM_PLAYER);
     assertEquals("Bottom player checkmated", true, game.isGameOver());

@@ -19,24 +19,16 @@ final class PieceFactory {
    * Produce an instance of the piece with given configuration.
    */
   public static Piece makePiece(PieceType type, PlayerType player) {
-    return makePieceMoved(type, player, false); // default to not moved
-  }
-
-  /**
-   * For testing purposes
-   */
-  static Piece makePieceMoved(PieceType type, PlayerType player, boolean hasMoved) {
     switch(type) {
-      case KING:   return new King(player, hasMoved);
-      case QUEEN:  return new Queen(player, hasMoved);
-      case BISHOP: return new Bishop(player, hasMoved);
-      case KNIGHT: return new Knight(player, hasMoved);
-      case CASTLE: return new Castle(player, hasMoved);
-      case PAWN:   return new Pawn(player, hasMoved);
+      case KING:   return new King(player, false);
+      case QUEEN:  return new Queen(player, false);
+      case BISHOP: return new Bishop(player, false);
+      case KNIGHT: return new Knight(player, false);
+      case CASTLE: return new Castle(player, false);
+      case PAWN:   return new Pawn(player, false);
       default: throw new RuntimeException("PieceType not recognized\n");
     }
   }
-
 
   /*---------------------------------------------------------------------------
    * The following classes are Piece instances with move logic corresponding to 
@@ -102,8 +94,7 @@ final class PieceFactory {
           }
           // make sure king and those empty positions are not under attack
           safePos.add(kingPos);
-          var opponent = (this.owner == PlayerType.TOP_PLAYER) ?
-                          PlayerType.BOTTOM_PLAYER : PlayerType.TOP_PLAYER;
+          var opponent = this.owner.getOpponent();
           if (allEmpty && anyUnderAttack(safePos, board, opponent)) {
             moves.add(MoveFactory.makeCastling(kingPos, Position.of(row, castleCol - colDelta)));
           }

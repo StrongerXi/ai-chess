@@ -12,7 +12,14 @@ public enum PlayerType {
   public String toString() {
     switch (this) {
       case TOP_PLAYER : return "top";
-      default : return "bottom";
+      default :         return "bottom";
+    }
+  }
+
+  public PlayerType getOpponent() {
+    switch (this) {
+      case TOP_PLAYER : return BOTTOM_PLAYER;
+      default :         return TOP_PLAYER;
     }
   }
 }

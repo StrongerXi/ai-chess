@@ -183,8 +183,7 @@ public final class ChessGameModel {
    * Switch the current player.
    */
   private void switchPlayer() {
-    this.currentPlayer = (currentPlayer == PlayerType.TOP_PLAYER) ?
-      PlayerType.BOTTOM_PLAYER : PlayerType.TOP_PLAYER;
+    this.currentPlayer = this.currentPlayer.getOpponent();
   }
 
 
