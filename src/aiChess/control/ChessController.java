@@ -112,6 +112,7 @@ public class ChessController implements ChessViewListener {
         case RESTART: {
           this.view.showMessage("Restarting...");
           this.model.restart();
+          this.view.refresh();
           continue;
         }
         case QUIT: {
