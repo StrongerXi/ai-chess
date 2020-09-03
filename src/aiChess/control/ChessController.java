@@ -110,12 +110,12 @@ public class ChessController implements ChessViewListener {
       // act based on user response
       switch (option) {
         case RESTART: {
-          this.view.showMessage("Restarting...\n");
+          this.view.showMessage("Restarting...");
           this.model.restart();
           continue;
         }
         case QUIT: {
-          this.view.showMessage("Quitting...\n");
+          this.view.showMessage("Quitting...");
           this.view.stopInteraction();
           return;
         }

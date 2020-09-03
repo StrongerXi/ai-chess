@@ -38,7 +38,7 @@ public class Main {
       case "text": {
         Readable input = new InputStreamReader(System.in);
         Appendable output = System.out;
-        view = new TextualView(input, output);
+        view = new TextualView(input, output, model);
         break;
       }
       case "gui" : {

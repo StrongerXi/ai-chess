@@ -172,7 +172,7 @@ public final class ChessGameModel {
    */
   public void undoLastMove() {
     if (moveHistory.isEmpty()) {
-      throw new InvalidUndoException("No undo available.\n");
+      throw new InvalidUndoException("No undo available.");
     }
     this.moveHistory.pop().undo(this.board);
     this.switchPlayer();
@@ -198,18 +198,18 @@ public final class ChessGameModel {
     System.out.printf("requested move (%d, %d) to (%d, %d)\n", srow, scol, drow, dcol);
     /* make sure source is in bound */
     if (srow < 0 || srow >= board.height || scol < 0 || scol >= board.width) {
-      throw new InvalidMoveException("source or target out of bound\n");
+      throw new InvalidMoveException("source or target out of bound");
     }
 
     Optional<Piece> source = this.board.getPieceAt(srow, scol);
     Position targetPos = Position.of(drow, dcol);
     /* make sure source has a piece, and target is reachable */
     if (!source.isPresent()) {
-      throw new InvalidMoveException("origin can't be empty\n");
+      throw new InvalidMoveException("origin can't be empty");
     }
 
     if (source.get().owner != currentPlayer) {
-      throw new InvalidMoveException("Not this player's turn yet\n");
+      throw new InvalidMoveException("Not this player's turn yet");
     }
 
     /* check requested move against each possible moves */
