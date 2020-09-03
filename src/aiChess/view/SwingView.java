@@ -213,6 +213,7 @@ public class SwingView implements ChessView {
     };
 
     javax.swing.SwingUtilities.invokeLater(() -> {
+      this.window = new JFrame("Chess");
       this.uiPanel = new UIPanel();
       var mainPanel = new JPanel(new BorderLayout());
       var toolbar = initToolBar.get();
@@ -222,13 +223,13 @@ public class SwingView implements ChessView {
       mainPanel.add(boardPanel, BorderLayout.CENTER);
       mainPanel.add(uiPanel, BorderLayout.EAST);
 
-      this.window = new JFrame("Chess");
       window.add(mainPanel);
       window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       window.pack(); // Minimize frame size while displaying all components
       window.setMinimumSize(window.getSize()); // enforce the minimum size
       window.setResizable(false);
       window.setVisible(true);
+      window.revalidate();
     });
   }
 
@@ -247,6 +248,7 @@ public class SwingView implements ChessView {
       }
     }
     this.uiPanel.refresh();
+    this.window.repaint();
   }
 
   public GameOverOption gameOverPrompt(PlayerType winner) {
