@@ -232,8 +232,8 @@ public class TextualView implements ChessView {
   private void display() {
 
     StringBuilder sb = new StringBuilder();
-    for (char[] row : this.board) {
-      for (char ch : row) {
+    for (int row = this.height - 1; row >= 0 ; row -= 1) {
+      for (char ch : this.board[row]) {
         sb.append(ch);
       }
       /* Add the newline character at the end */
