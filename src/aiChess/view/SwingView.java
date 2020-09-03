@@ -5,6 +5,7 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Color;
 import java.awt.Insets;
+import java.awt.Dimension;
 
 import javax.swing.border.EmptyBorder;
 
@@ -15,8 +16,7 @@ import java.net.URL;
 
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Collections;
 import java.io.File;
 
 import aiChess.model.Piece;
@@ -80,7 +80,11 @@ public class SwingView implements ChessView {
       PlayerAgent.HUMAN, PlayerAgent.EASY_COMPUTER, PlayerAgent.MEDIUM_COMPUTER, PlayerAgent.HARD_COMPUTER };
     private final JComboBox<String> topBox = new JComboBox<>(options);
     private final JComboBox<String> botBox = new JComboBox<>(options);
+    private final DefaultListModel<String> historyList = new DefaultListModel<>();
 
+    /**
+     * Constructor.
+     */
     UIPanel() {
       super();
       this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -88,26 +92,49 @@ public class SwingView implements ChessView {
       var botPanel = this.createPlayerPanel(PlayerType.BOTTOM_PLAYER, botBox);
       this.add(topPanel);
       this.add(botPanel);
+      this.add(new JScrollPane(new JList<>(this.historyList)));
+    }
+
+    private void refresh() {
+      this.historyList.clear();
+      var moves = SwingView.this.model.getMoveHistory();
+      Collections.reverse(moves);
+      for (var move : moves) {
+        var typeStr = "[unknown]";
+        switch (move.type) {
+          case REGULAR:        typeStr = "[regular]"; break;
+          case CASTLING:       typeStr = "[castling]"; break;
+          case PAWN_PROMOTION: typeStr = "[pawn promotion]"; break;
+        }
+        var s = String.format("%s from %s, to %s",
+            typeStr, posToStr(move.sourcePos), posToStr(move.targetPos));
+        this.historyList.addElement(s);
+      }
+    }
+
+    private String posToStr(Position pos) {
+      return String.format("(%s, %s)", pos.row, pos.col);
     }
 
     // create a row panel for selecting
     private JPanel createPlayerPanel(PlayerType player, JComboBox<String> agentOpts) {
-      var panel = new JPanel(new GridLayout());
-      var changeButton = new JButton("change");
-      changeButton.addActionListener(e -> {
+      var panel = new JPanel();
+      agentOpts.addActionListener(e -> {
         var index = agentOpts.getSelectedIndex();
         var agent = this.agents[index];
-        SwingView.this.listener.ifPresent(l -> l.setPlayerAgentRequested(player, agent));
+        SwingView.this.listener
+          .ifPresent(l -> l.setPlayerAgentRequested(player, agent));
       });
       panel.add(agentOpts);
-      panel.add(changeButton);
       var title = (player == PlayerType.TOP_PLAYER) ? "top" : "bottom";
       panel.setBorder(BorderFactory.createTitledBorder(title));
+      panel.setPreferredSize(new Dimension(3 * TILE_SIZE, 1 * TILE_SIZE));
       return panel;
     }
   }
 
   private JFrame window;
+  private UIPanel uiPanel;
   private JButton[][] boardButtons;
   private ChessGameModel model;
   private Optional<ChessViewListener> listener = Optional.empty();
@@ -186,7 +213,7 @@ public class SwingView implements ChessView {
     };
 
     javax.swing.SwingUtilities.invokeLater(() -> {
-      var uiPanel = new UIPanel();
+      this.uiPanel = new UIPanel();
       var mainPanel = new JPanel(new BorderLayout());
       var toolbar = initToolBar.get();
       var boardPanel = initBoardPanel.get();
@@ -219,6 +246,7 @@ public class SwingView implements ChessView {
         setBackgroundAt(row, col, TileState.NORMAL);
       }
     }
+    this.uiPanel.refresh();
   }
 
   public GameOverOption gameOverPrompt(PlayerType winner) {
@@ -253,10 +281,9 @@ public class SwingView implements ChessView {
     this.lastSelected.ifPresentOrElse(pos -> {
       int srow = pos.row;
       int scol = pos.col;
-      this.lastSelected = Optional.empty();
       this.listener.ifPresent(l -> l.moveRequested(srow, scol, row, col));
+      this.lastSelected = Optional.empty();
       this.refresh();
-
     }, /* else */ () -> {
       Optional<Piece> source = model.getPieceAt(row, col);
       if (!source.isPresent() || source.get().owner != model.getCurrentPlayer()) {
