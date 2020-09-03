@@ -63,7 +63,6 @@ public class ChessController implements ChessViewListener {
       var src = move.sourcePos;
       var dst = move.targetPos;
       this.model.makeMove(src.row, src.col, dst.row, dst.col);
-      this.view.refresh(); // this move bypassed view, manually sync it.
     }
   }
 
@@ -101,7 +100,9 @@ public class ChessController implements ChessViewListener {
 
     while (true) {
       if (!this.model.isGameOver()) { // unlikely but well...
-        while (!this.takeTurn(model.getCurrentPlayer()));
+        while (!this.takeTurn(model.getCurrentPlayer())) {
+          this.view.refresh();
+        }
       }
       // game is over
       var player = this.model.getCurrentPlayer();

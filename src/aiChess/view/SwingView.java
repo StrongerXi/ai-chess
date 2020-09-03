@@ -151,7 +151,6 @@ public class SwingView implements ChessView {
       undoButton.addActionListener(e -> this.listener.ifPresent(l ->  {
         l.undoRequested();
         this.lastSelected = Optional.empty();
-        this.refresh();
       }));
 
       toolbar.add(restartButton);
@@ -187,10 +186,10 @@ public class SwingView implements ChessView {
     };
 
     javax.swing.SwingUtilities.invokeLater(() -> {
+      var uiPanel = new UIPanel();
       var mainPanel = new JPanel(new BorderLayout());
       var toolbar = initToolBar.get();
       var boardPanel = initBoardPanel.get();
-      var uiPanel = new UIPanel();
 
       mainPanel.add(toolbar, BorderLayout.NORTH);
       mainPanel.add(boardPanel, BorderLayout.CENTER);
@@ -254,9 +253,9 @@ public class SwingView implements ChessView {
     this.lastSelected.ifPresentOrElse(pos -> {
       int srow = pos.row;
       int scol = pos.col;
+      this.lastSelected = Optional.empty();
       this.listener.ifPresent(l -> l.moveRequested(srow, scol, row, col));
       this.refresh();
-      this.lastSelected = Optional.empty();
 
     }, /* else */ () -> {
       Optional<Piece> source = model.getPieceAt(row, col);
