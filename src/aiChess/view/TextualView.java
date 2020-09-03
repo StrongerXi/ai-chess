@@ -144,7 +144,7 @@ public class TextualView implements ChessView {
    */
   @Override
   public void showMessage(String msg) {
-    System.out.printf(msg);
+    System.out.println(msg);
   }
 
 
@@ -173,7 +173,7 @@ public class TextualView implements ChessView {
           int row = Integer.parseInt(token);
           int col = scan.nextInt();
           if (!this.isValidPos(row, col)) {
-            this.showMessage("Position is invalid\n");
+            this.showMessage("Position is invalid");
             continue;
           }
 
@@ -193,7 +193,7 @@ public class TextualView implements ChessView {
             /* ignore if selected tile is empty or it's not this player's turn yet */
             Optional<Piece> source = model.getPieceAt(row, col);
             if (!source.isPresent() || source.get().owner != model.getCurrentPlayer()) {
-              this.showMessage("Source is empty or not this player's turn\n");
+              this.showMessage("Source is empty or not this player's turn");
               continue;
             }
 
@@ -243,6 +243,7 @@ public class TextualView implements ChessView {
 
     try {
       output.append(sb.toString());
+      output.append('\n');
     } catch (IOException e) {
       throw new IllegalStateException("Output IO error\n");
     }
@@ -315,8 +316,8 @@ public class TextualView implements ChessView {
   @Override
   public GameOverOption gameOverPrompt(PlayerType player) {
     var winner = (player == PlayerType.TOP_PLAYER) ? "<top>" : "<bottom>";
-    this.showMessage("The game is over, player " + winner + " won\n");
-    this.showMessage("Enter 'r' to restart, else to quit.\n");
+    this.showMessage("The game is over, player " + winner + " won");
+    this.showMessage("Enter 'r' to restart, else to quit.");
     String token = this.scan.next();
     switch (token) {
       case "r": return GameOverOption.RESTART;

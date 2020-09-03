@@ -5,7 +5,7 @@ import aiChess.model.Position;
 public class InvalidPositionException extends RuntimeException {
 
   public InvalidPositionException(Position pos) {
-    super(String.format("%s out of bound\n", pos));
+    super(String.format("%s out of bound", pos));
   }
 
   public InvalidPositionException(int row, int col) {
