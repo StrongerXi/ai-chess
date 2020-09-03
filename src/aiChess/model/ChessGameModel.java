@@ -201,8 +201,9 @@ public final class ChessGameModel {
       throw new InvalidMoveException("source or target out of bound");
     }
 
-    Optional<Piece> source = this.board.getPieceAt(srow, scol);
-    Position targetPos = Position.of(drow, dcol);
+    var source = this.board.getPieceAt(srow, scol);
+    var sourcePos = Position.of(srow, scol);
+    var targetPos = Position.of(drow, dcol);
     /* make sure source has a piece, and target is reachable */
     if (!source.isPresent()) {
       throw new InvalidMoveException("origin can't be empty");
@@ -213,8 +214,8 @@ public final class ChessGameModel {
     }
 
     /* check requested move against each possible moves */
-    for (Move m : source.get().getAllMovesFrom(this.board, srow, scol)) {
-      if (m.targetPos.equals(targetPos)) {
+    for (Move m : this.board.getAllLegalMoves(this.currentPlayer)) {
+      if (m.sourcePos.equals(sourcePos) && m.targetPos.equals(targetPos)) {
         /* apply the move if it's valid */
         m.apply(this.board);
         moveHistory.add(m);
