@@ -96,20 +96,22 @@ public class SwingView implements ChessView {
     }
 
     private void refresh() {
-      this.historyList.clear();
-      var moves = SwingView.this.model.getMoveHistory();
-      Collections.reverse(moves);
-      for (var move : moves) {
-        var typeStr = "[unknown]";
-        switch (move.type) {
-          case REGULAR:        typeStr = "[regular]"; break;
-          case CASTLING:       typeStr = "[castling]"; break;
-          case PAWN_PROMOTION: typeStr = "[pawn promotion]"; break;
+      SwingUtilities.invokeLater(() -> {
+        this.historyList.clear();
+        var moves = SwingView.this.model.getMoveHistory();
+        Collections.reverse(moves);
+        for (var move : moves) {
+          var typeStr = "[unknown]";
+          switch (move.type) {
+            case REGULAR:        typeStr = "[regular]"; break;
+            case CASTLING:       typeStr = "[castling]"; break;
+            case PAWN_PROMOTION: typeStr = "[pawn promotion]"; break;
+          }
+          var s = String.format("%s from %s, to %s",
+              typeStr, posToStr(move.sourcePos), posToStr(move.targetPos));
+          this.historyList.addElement(s);
         }
-        var s = String.format("%s from %s, to %s",
-            typeStr, posToStr(move.sourcePos), posToStr(move.targetPos));
-        this.historyList.addElement(s);
-      }
+      });
     }
 
     private String posToStr(Position pos) {

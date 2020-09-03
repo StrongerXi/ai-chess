@@ -188,14 +188,14 @@ public class ChessController implements ChessViewListener {
    * @param tcol the col index of target tile
    */
   public void moveRequested(int srow, int scol, int trow, int tcol) {
-    try {
-      synchronized (lock) {
+    synchronized (lock) {
+      try {
         this.model.makeMove(srow, scol, trow, tcol);
-        playerActed = true;
-        lock.notify();
+      } catch (InvalidMoveException e) {
+        this.view.showMessage(e.getMessage());
       }
-    } catch (InvalidMoveException e) {
-      this.view.showMessage(e.getMessage());
+      playerActed = true;
+      lock.notify();
     }
   }
 
