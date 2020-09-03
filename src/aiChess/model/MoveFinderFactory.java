@@ -404,11 +404,12 @@ public final class MoveFinderFactory {
     // move related scores
     var moveScore = 0;
     for (var move : legalMoves) {
+      var score = 1; // mobility bonus
       var srcPos = move.sourcePos;
       var source = board.getPieceAt(srcPos.row, srcPos.col).get();
+      /* TODO this is too naive, leading AI to attack blindly
       var dstPos = move.targetPos;
       var targetOpt = board.getPieceAt(dstPos.row, dstPos.col);
-      var score = 1; // mobility bonus
       if (targetOpt.isPresent()) {
         // protect or attack
         var target = targetOpt.get();
@@ -416,6 +417,7 @@ public final class MoveFinderFactory {
         var pieceScore = pieceMaterialScore(target.type) / 2;
         score += pieceScore;
       }
+      */
       if (source.owner != player) {
         score *= -1;
       }
