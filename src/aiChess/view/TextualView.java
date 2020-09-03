@@ -92,7 +92,7 @@ public class TextualView implements ChessView {
   private char[][] board;
   private final Appendable output;
   private Optional<ChessViewListener> listener = Optional.empty();
-  private Optional<ChessGameModel> model = Optional.empty();
+  private ChessGameModel model;
   private Scanner scan;
   private boolean running = false;
 
@@ -102,13 +102,14 @@ public class TextualView implements ChessView {
    * @param height number of Pieces to be shown in a column
    * @throws IllegalArgumentException if either width/height is non-positive, or player1 == player2
    */
-  public TextualView(Readable input, Appendable output) {
+  public TextualView(Readable input, Appendable output, ChessGameModel model) {
     if (input == null || output == null) {
       throw new IllegalArgumentException("Cannot null inputs\n");
     }
 
     this.scan = new Scanner(input);
     this.output = output;
+    this.model = model;
   }
 
 
@@ -159,63 +160,61 @@ public class TextualView implements ChessView {
   public void beginInteraction() {
     this.running = true;
     this.display();
-    model.ifPresent(model -> {
-      while (this.running) {
-        try {
-          String token = scan.next();
-          if (token.equals("undo")) {
-            this.listener.ifPresent(l -> l.undoRequested());
-            this.lastSelected = Optional.empty();
-            this.synchWithModel(model);
-            continue;
-          } 
+    while (this.running) {
+      try {
+        String token = scan.next();
+        if (token.equals("undo")) {
+          this.listener.ifPresent(l -> l.undoRequested());
+          this.lastSelected = Optional.empty();
+          this.synchWithModel(model);
+          continue;
+        } 
 
-          int row = Integer.parseInt(token);
-          int col = scan.nextInt();
-          if (!this.isValidPos(row, col)) {
-            this.showMessage("Position is invalid");
-            continue;
-          }
-
-          /* if there was a selection previously, this selection indicates a move request */
-          if (lastSelected.isPresent()) {
-            int srow = lastSelected.get().row;
-            int scol = lastSelected.get().col;
-            /* synch with model again to get rid of the background highlights 
-             * from previous selection, note that move may fail.*/
-            this.synchWithModel(model);
-            this.listener.ifPresent(l -> l.moveRequested(srow, scol, row, col));
-            /* synch again after move */
-            this.synchWithModel(model);
-            lastSelected = Optional.empty();
-
-          } else {
-            /* ignore if selected tile is empty or it's not this player's turn yet */
-            Optional<Piece> source = model.getPieceAt(row, col);
-            if (!source.isPresent() || source.get().owner != model.getCurrentPlayer()) {
-              this.showMessage("Source is empty or not this player's turn");
-              continue;
-            }
-
-            this.setBackgroundAt(row, col, TileState.SELECTED);
-            /* light up all reachable states */
-            for (Position pos : model.getAllMovesFrom(row, col)) {
-              TileState state = model.getPieceAt(pos.row, pos.col).isPresent() ? 
-                TileState.ATTACKABLE : TileState.REACHABLE;
-              this.setBackgroundAt(pos.row, pos.col, state);
-            }
-            lastSelected = Optional.of(Position.of(row, col));
-            display(); // display highlighted tiles
-          }
-
-        } catch (InputMismatchException e) {
-          this.showMessage("Please specify either numerical input or 'undo'");
-
-        } catch (NumberFormatException e) {
-          this.showMessage("Please specify a valid number input");
+        int row = Integer.parseInt(token);
+        int col = scan.nextInt();
+        if (!this.isValidPos(row, col)) {
+          this.showMessage("Position is invalid");
+          continue;
         }
+
+        /* if there was a selection previously, this selection indicates a move request */
+        if (lastSelected.isPresent()) {
+          int srow = lastSelected.get().row;
+          int scol = lastSelected.get().col;
+          /* synch with model again to get rid of the background highlights 
+           * from previous selection, note that move may fail.*/
+          this.synchWithModel(model);
+          this.listener.ifPresent(l -> l.moveRequested(srow, scol, row, col));
+          /* synch again after move */
+          this.synchWithModel(model);
+          lastSelected = Optional.empty();
+
+        } else {
+          /* ignore if selected tile is empty or it's not this player's turn yet */
+          Optional<Piece> source = model.getPieceAt(row, col);
+          if (!source.isPresent() || source.get().owner != model.getCurrentPlayer()) {
+            this.showMessage("Source is empty or not this player's turn");
+            continue;
+          }
+
+          this.setBackgroundAt(row, col, TileState.SELECTED);
+          /* light up all reachable states */
+          for (Position pos : model.getAllMovesFrom(row, col)) {
+            TileState state = model.getPieceAt(pos.row, pos.col).isPresent() ? 
+              TileState.ATTACKABLE : TileState.REACHABLE;
+            this.setBackgroundAt(pos.row, pos.col, state);
+          }
+          lastSelected = Optional.of(Position.of(row, col));
+          display(); // display highlighted tiles
+        }
+
+      } catch (InputMismatchException e) {
+        this.showMessage("Please specify either numerical input or 'undo'");
+
+      } catch (NumberFormatException e) {
+        this.showMessage("Please specify a valid number input");
       }
-    });
+    }
   }
 
   /**
@@ -278,7 +277,6 @@ public class TextualView implements ChessView {
    */
   @Override
   public void setModel(ChessGameModel model) {
-    this.model = Optional.ofNullable(model);
     this.height = model == null ? 0 : model.getHeight();
     this.width = model == null ? 0 : model.getWidth();
 
@@ -288,7 +286,7 @@ public class TextualView implements ChessView {
     for (int row = 0; row < height; row += 1) {
       board[row] = new char[rowLength];
     }
-    this.model.ifPresent(this::synchWithModel);
+    this.synchWithModel(model);
   }
 
 
@@ -297,10 +295,8 @@ public class TextualView implements ChessView {
    */
   @Override
   public void refresh() {
-    this.model.ifPresent(model -> {
-      this.synchWithModel(model);
-      this.display();
-    });
+    this.synchWithModel(model);
+    this.display();
   }
 
 
