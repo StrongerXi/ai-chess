@@ -158,10 +158,9 @@ public class TextualView implements ChessView {
   @Override
   public void beginInteraction() {
     this.running = true;
+    this.display();
     model.ifPresent(model -> {
       while (this.running) {
-        display();
-
         try {
           String token = scan.next();
           if (token.equals("undo")) {
@@ -188,7 +187,6 @@ public class TextualView implements ChessView {
             this.listener.ifPresent(l -> l.moveRequested(srow, scol, row, col));
             /* synch again after move */
             this.synchWithModel(model);
-
             lastSelected = Optional.empty();
 
           } else {
@@ -207,6 +205,7 @@ public class TextualView implements ChessView {
               this.setBackgroundAt(pos.row, pos.col, state);
             }
             lastSelected = Optional.of(Position.of(row, col));
+            display(); // display highlighted tiles
           }
 
         } catch (InputMismatchException e) {
