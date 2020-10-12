@@ -1,9 +1,7 @@
 package aiChess.control;
 
 import aiChess.view.ChessViewListener;
-import aiChess.view.ChessViewListener.PlayerAgent;
 import aiChess.view.ChessView;
-import aiChess.view.GameOverOption;
 import aiChess.model.ChessGameModel;
 import aiChess.model.MoveFinder;
 import aiChess.model.MoveFinderFactory;
@@ -52,11 +50,9 @@ public class ChessController implements ChessViewListener {
   private final static class AIController implements PlayerController {
     private final MoveFinder finder;
     private final ChessGameModel model;
-    private final ChessView view;
-    AIController(MoveFinder finder, ChessGameModel model, ChessView view) {
+    AIController(MoveFinder finder, ChessGameModel model) {
       this.finder = finder;
       this.model = model;
-      this.view = view;
     }
     public void makeMove() {
       var move = this.finder.getBestMove(this.model);
@@ -69,7 +65,6 @@ public class ChessController implements ChessViewListener {
   private final ChessGameModel model;
   private final ChessView view;
   // only makes sense if corresponding controller is AI
-  private final Map<PlayerType, MoveFinder> moveFinderMap = new HashMap<>();
   private final Map<PlayerType, PlayerController> controllerMap = new HashMap<>();
 
 
@@ -81,8 +76,6 @@ public class ChessController implements ChessViewListener {
     Objects.requireNonNull(view, "view is null\n");
     this.model = model;
     this.view = view;
-    var defaultFinder =
-      MoveFinderFactory.makeMoveFinder(MoveFinderType.MTDF, 4, PlayerType.TOP_PLAYER);
     // default user vs user
     this.controllerMap.put(PlayerType.TOP_PLAYER, new UserController());
     this.controllerMap.put(PlayerType.BOTTOM_PLAYER, new UserController());
@@ -174,7 +167,7 @@ public class ChessController implements ChessViewListener {
             finder = MoveFinderFactory.makeMoveFinder(MoveFinderType.MTDF, 4, player);
           }
         }
-        controller = new AIController(finder, this.model, this.view);
+        controller = new AIController(finder, this.model);
       }
       this.controllerMap.put(player, controller);
     }

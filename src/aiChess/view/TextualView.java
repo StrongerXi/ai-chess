@@ -6,10 +6,7 @@ import aiChess.model.PieceType;
 import aiChess.model.PlayerType;
 import aiChess.model.Position;
 
-import java.util.Arrays;
 import java.util.Optional;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.InputMismatchException;
 

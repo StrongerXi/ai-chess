@@ -1,7 +1,6 @@
 package aiChess.model;
 
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * A Move contains all the logic of the concrete move it represents.

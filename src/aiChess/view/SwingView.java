@@ -271,9 +271,6 @@ public class SwingView implements ChessView {
 
   public void stopInteraction() {
     this.window.dispose();
-    this.window.setVisible(false);
-    // TODO application won't terminate without explicitly exitting
-    System.exit(0);
   }
 
   /**
